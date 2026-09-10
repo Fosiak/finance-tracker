@@ -1,4 +1,5 @@
 import { Bell, ChevronDown } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function Navbar() {
   return (
@@ -10,7 +11,10 @@ function Navbar() {
           <Bell size={18} />
         </button>
 
-        <div className="flex items-center gap-3 border-l border-[#292929] pl-5">
+        <Link
+          to="/profile"
+          className="flex items-center gap-3 border-l border-[#292929] pl-5 transition"
+        >
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm font-semibold text-black">
             U
           </div>
@@ -22,7 +26,7 @@ function Navbar() {
           </div>
 
           <ChevronDown size={16} className="text-zinc-500" />
-        </div>
+        </Link>
       </div>
     </header>
   );
