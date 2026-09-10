@@ -11,7 +11,8 @@ function Expenses() {
 
   const [search, setSearch] = useState("");
 
-  const { expenses, addExpense, deleteExpense, updateExpense } = useFinance();
+  const { selectedMonthExpenses, addExpense, deleteExpense, updateExpense } =
+    useFinance();
 
   function handleDeleteExpense(id) {
     deleteExpense(id);
@@ -33,7 +34,7 @@ function Expenses() {
     setEditingExpense(null);
   }
 
-  const filteredExpenses = expenses.filter((expense) =>
+  const filteredExpenses = selectedMonthExpenses.filter((expense) =>
     expense.description.toLowerCase().includes(search.toLowerCase()),
   );
 

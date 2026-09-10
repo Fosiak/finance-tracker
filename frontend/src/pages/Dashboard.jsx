@@ -12,17 +12,23 @@ import { useFinance } from "../context/FinanceContext";
 function Dashboard() {
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
 
-  const { expenses, addExpense } = useFinance();
+  const { selectedMonth, setSelectedMonth, selectedMonthExpenses, addExpense } =
+    useFinance();
 
   const income = 5000;
   const budget = 3000;
 
-  const totalExpenses = expenses.reduce(
+  const totalExpenses = selectedMonthExpenses.reduce(
     (total, expense) => total + expense.amount,
     0,
   );
 
   const balance = income - totalExpenses;
+
+  const monthName = new Date(`${selectedMonth}-01`).toLocaleString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
 
   return (
     <div className="px-8 py-8">
@@ -40,10 +46,19 @@ function Dashboard() {
 
         <div className="flex items-center gap-3">
           {/* Month selector */}
-          <button className="flex items-center gap-2 rounded-lg border border-[#292929] bg-[#181818] px-4 py-2.5 text-sm font-medium text-zinc-300 transition hover:bg-[#222222] hover:text-white">
-            September 2026
-            <ChevronDown size={16} />
-          </button>
+          <select
+            value={selectedMonth}
+            onChange={(event) => setSelectedMonth(event.target.value)}
+            className="appearance-none rounded-lg border border-[#292929] bg-[#181818] px-4 py-2.5 pr-8 text-sm font-medium text-zinc-300 outline-none focus:border-zinc-500"
+          >
+            <option value="2026-08">August 2026</option>
+
+            <option value="2026-09">September 2026</option>
+
+            <option value="2026-10">October 2026</option>
+
+            <option value="2026-11">November 2026</option>
+          </select>
 
           {/* Add expense */}
           <button
@@ -95,7 +110,7 @@ function Dashboard() {
                 </p>
               </div>
 
-              <span className="text-sm text-zinc-500">September</span>
+              <span className="text-sm text-zinc-500">{monthName}</span>
             </div>
 
             <div className="mt-6">
@@ -128,7 +143,7 @@ function Dashboard() {
           </div>
 
           <div className="mt-4">
-            {expenses.slice(0, 5).map((expense) => (
+            {selectedMonthExpenses.slice(0, 5).map((expense) => (
               <TransactionCard
                 key={expense.id}
                 description={expense.description}

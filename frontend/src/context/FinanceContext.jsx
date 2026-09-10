@@ -28,7 +28,25 @@ function FinanceProvider({ children }) {
       description: "Netflix",
       date: "2026-09-02",
     },
+    {
+      id: 4,
+      type: "expense",
+      amount: 250,
+      category: "shopping",
+      description: "Clothes",
+      date: "2026-08-20",
+    },
+    {
+      id: 5,
+      type: "expense",
+      amount: 80,
+      category: "food",
+      description: "Restaurant",
+      date: "2026-08-15",
+    },
   ]);
+
+  const [selectedMonth, setSelectedMonth] = useState("2026-09");
 
   function addExpense(expense) {
     setExpenses((currentExpenses) => [expense, ...currentExpenses]);
@@ -48,10 +66,19 @@ function FinanceProvider({ children }) {
     );
   }
 
+  function getExpensesForMonth(month) {
+    return expenses.filter((expense) => expense.date.startsWith(month));
+  }
+
+  const selectedMonthExpenses = getExpensesForMonth(selectedMonth);
+
   return (
     <FinanceContext.Provider
       value={{
         expenses,
+        selectedMonth,
+        setSelectedMonth,
+        selectedMonthExpenses,
         addExpense,
         deleteExpense,
         updateExpense,
