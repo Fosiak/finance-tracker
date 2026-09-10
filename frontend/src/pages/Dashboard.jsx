@@ -12,11 +12,15 @@ import { useFinance } from "../context/FinanceContext";
 function Dashboard() {
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
 
-  const { selectedMonth, setSelectedMonth, selectedMonthExpenses, addExpense } =
-    useFinance();
+  const {
+    selectedMonth,
+    setSelectedMonth,
+    selectedMonthExpenses,
+    selectedMonthBudget,
+    addExpense,
+  } = useFinance();
 
   const income = 5000;
-  const budget = 3000;
 
   const totalExpenses = selectedMonthExpenses.reduce(
     (total, expense) => total + expense.amount,
@@ -119,7 +123,7 @@ function Dashboard() {
           </div>
 
           {/* Budget */}
-          <BudgetCard budget={budget} spent={totalExpenses} />
+          <BudgetCard budget={selectedMonthBudget} spent={totalExpenses} />
         </div>
       </section>
 

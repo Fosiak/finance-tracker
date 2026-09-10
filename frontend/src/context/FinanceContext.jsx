@@ -48,6 +48,11 @@ function FinanceProvider({ children }) {
 
   const [selectedMonth, setSelectedMonth] = useState("2026-09");
 
+  const [budgets, setBudgets] = useState({
+    "2026-08": 3000,
+    "2026-09": 3000,
+  });
+
   function addExpense(expense) {
     setExpenses((currentExpenses) => [expense, ...currentExpenses]);
   }
@@ -70,7 +75,20 @@ function FinanceProvider({ children }) {
     return expenses.filter((expense) => expense.date.startsWith(month));
   }
 
+  function setBudget(month, amount) {
+    setBudgets((currentBudgets) => ({
+      ...currentBudgets,
+      [month]: amount,
+    }));
+  }
+
+  function getBudgetForMonth(month) {
+    return budgets[month] ?? 0;
+  }
+
   const selectedMonthExpenses = getExpensesForMonth(selectedMonth);
+
+  const selectedMonthBudget = getBudgetForMonth(selectedMonth);
 
   return (
     <FinanceContext.Provider
@@ -79,6 +97,12 @@ function FinanceProvider({ children }) {
         selectedMonth,
         setSelectedMonth,
         selectedMonthExpenses,
+
+        budgets,
+        setBudget,
+        getBudgetForMonth,
+        selectedMonthBudget,
+
         addExpense,
         deleteExpense,
         updateExpense,

@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import Dashboard from "./pages/Dashboard";
 import Expenses from "./pages/Expenses";
+import Budget from "./pages/Budget";
 import { FinanceProvider } from "./context/FinanceContext";
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/expenses" element={<Expenses />} />
+            <Route path="/budget" element={<Budget />} />
           </Routes>
         </MainLayout>
       </BrowserRouter>
