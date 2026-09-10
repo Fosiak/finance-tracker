@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 
 import AddExpenseModal from "../components/AddExpenseModal";
+import { useFinance } from "../context/FinanceContext";
 
 function Expenses() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -10,41 +11,10 @@ function Expenses() {
 
   const [search, setSearch] = useState("");
 
-  const [expenses, setExpenses] = useState([
-    {
-      id: 1,
-      type: "expense",
-      amount: 45.99,
-      category: "food",
-      description: "Groceries",
-      date: "2026-09-05",
-    },
-    {
-      id: 2,
-      type: "expense",
-      amount: 120,
-      category: "transport",
-      description: "Fuel",
-      date: "2026-09-04",
-    },
-    {
-      id: 3,
-      type: "expense",
-      amount: 49.99,
-      category: "subscriptions",
-      description: "Netflix",
-      date: "2026-09-02",
-    },
-  ]);
-
-  function handleAddExpense(expense) {
-    setExpenses((currentExpenses) => [expense, ...currentExpenses]);
-  }
+  const { expenses, addExpense, deleteExpense, updateExpense } = useFinance();
 
   function handleDeleteExpense(id) {
-    setExpenses((currentExpenses) =>
-      currentExpenses.filter((expense) => expense.id !== id),
-    );
+    deleteExpense(id);
   }
 
   function handleEditExpense(expense) {
@@ -53,11 +23,7 @@ function Expenses() {
   }
 
   function handleUpdateExpense(updatedExpense) {
-    setExpenses((currentExpenses) =>
-      currentExpenses.map((expense) =>
-        expense.id === updatedExpense.id ? updatedExpense : expense,
-      ),
-    );
+    updateExpense(updatedExpense);
 
     setEditingExpense(null);
   }
@@ -187,7 +153,7 @@ function Expenses() {
       <AddExpenseModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        onAddExpense={editingExpense ? handleUpdateExpense : handleAddExpense}
+        onAddExpense={editingExpense ? handleUpdateExpense : addExpense}
         editingExpense={editingExpense}
       />
     </div>

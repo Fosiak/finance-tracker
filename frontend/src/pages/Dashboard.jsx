@@ -7,38 +7,14 @@ import TransactionCard from "../components/TransactionCard";
 import SpendingChart from "../components/SpendingChart";
 import AddExpenseModal from "../components/AddExpenseModal";
 
+import { useFinance } from "../context/FinanceContext";
+
 function Dashboard() {
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
 
-  const [expenses, setExpenses] = useState([
-    {
-      id: 1,
-      type: "expense",
-      amount: 45.99,
-      category: "food",
-      description: "Groceries",
-      date: "2026-09-05",
-    },
-    {
-      id: 2,
-      type: "expense",
-      amount: 120,
-      category: "transport",
-      description: "Fuel",
-      date: "2026-09-04",
-    },
-    {
-      id: 3,
-      type: "expense",
-      amount: 49.99,
-      category: "subscriptions",
-      description: "Netflix",
-      date: "2026-09-02",
-    },
-  ]);
+  const { expenses, addExpense } = useFinance();
 
   const income = 5000;
-
   const budget = 3000;
 
   const totalExpenses = expenses.reduce(
@@ -47,10 +23,6 @@ function Dashboard() {
   );
 
   const balance = income - totalExpenses;
-
-  const handleAddExpense = (expense) => {
-    setExpenses((currentExpenses) => [expense, ...currentExpenses]);
-  };
 
   return (
     <div className="px-8 py-8">
@@ -156,7 +128,7 @@ function Dashboard() {
           </div>
 
           <div className="mt-4">
-            {expenses.map((expense) => (
+            {expenses.slice(0, 5).map((expense) => (
               <TransactionCard
                 key={expense.id}
                 description={expense.description}
@@ -173,7 +145,7 @@ function Dashboard() {
       <AddExpenseModal
         isOpen={isExpenseModalOpen}
         onClose={() => setIsExpenseModalOpen(false)}
-        onAddExpense={handleAddExpense}
+        onAddExpense={addExpense}
       />
     </div>
   );
