@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { Receipt, Wallet, TrendingUp } from "lucide-react";
 
+import CategorySpendingChart from "../components/CategorySpendingChart";
+
 import { useFinance } from "../context/FinanceContext";
 
 function Statistics() {
@@ -102,7 +104,28 @@ function Statistics() {
           />
         </div>
       </section>
+      {/* Chart */}
+      <section className="mt-6">
+        <div className="rounded-xl border border-[#292929] bg-[#181818] p-6">
+          <div>
+            <h2 className="text-base font-semibold text-white">
+              Spending by category
+            </h2>
 
+            <p className="mt-1 text-sm text-zinc-500">
+              Compare your spending across categories.
+            </p>
+          </div>
+
+          <div className="mt-6">
+            {statistics.sortedCategories.length > 0 ? (
+              <CategorySpendingChart data={statistics.sortedCategories} />
+            ) : (
+              <EmptyState />
+            )}
+          </div>
+        </div>
+      </section>
       {/* Main content */}
       <section className="mt-6">
         <div className="grid gap-6 lg:grid-cols-3">
