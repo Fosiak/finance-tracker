@@ -6,6 +6,8 @@ from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 
 from .auth_serializers import SecureTokenObtainPairSerializer
 from .email_verification import verify_email_verification_token
@@ -14,7 +16,8 @@ from .serializers import (
     ProfileSerializer, 
     ChangePasswordSerializer,
     PasswordResetRequestSerializer,
-    PasswordResetConfirmSerializer)
+    PasswordResetConfirmSerializer,
+    LogoutSerializer)
 
 from .emails import send_password_reset_email
 from .password_reset import verify_password_reset_token
@@ -231,5 +234,42 @@ class VerifyEmailView(generics.GenericAPIView):
 
         return Response(
             {"detail": "Email successfully verified."},
+            status=status.HTTP_200_OK,
+        )
+
+class LogoutView(generics.GenericAPIView):
+    serializer_class = LogoutSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = self.get_serializer(
+            data=request.data,
+        )
+
+        serializer.is_valid(
+            raise_exception=True,
+        )
+
+        refresh_token = serializer.validated_data["refresh"]
+
+        try:
+            token = RefreshToken(refresh_token)
+
+            if token["user_id"] != str(request.user.pk):
+                raise TokenError("Token does not belong to user.")
+            token.blacklist()
+
+        except TokenError:
+            return Response(
+                {
+                    "detail": "Invalid refresh token."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            {
+                "detail":"Successfully logged out."
+            },
             status=status.HTTP_200_OK,
         )

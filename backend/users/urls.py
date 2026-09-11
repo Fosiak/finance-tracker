@@ -9,6 +9,7 @@ from .views import (
     ChangePasswordView,
     PasswordResetRequestView,
     PasswordResetConfirmView,
+    LogoutView,
 )
 
 
@@ -59,5 +60,10 @@ urlpatterns = [
         "password-reset-confirm/",
         PasswordResetConfirmView.as_view(),
         name="password_reset_confirm",
+    ),
+    path(
+        "logout/",
+        LogoutView.as_view(),
+        name="logout",
     ),
 ]

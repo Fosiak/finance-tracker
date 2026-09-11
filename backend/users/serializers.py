@@ -252,3 +252,9 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
             )
 
         return attrs
+
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField(
+        write_only=True,
+    )
