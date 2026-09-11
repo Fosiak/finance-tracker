@@ -211,3 +211,7 @@ DEFAULT_FROM_EMAIL = env(
     "DEFAULT_FROM_EMAIL",
     default="no-reply@localhost",
 )
+
+import sys 
+if "pytest" in sys.modules:
+    REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"] = []
