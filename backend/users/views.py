@@ -44,9 +44,7 @@ class VerifyEmailView(generics.GenericAPIView):
                 urlsafe_base64_decode(uidb64)
             )
 
-            user = User.objects.get(
-                pk=uid,
-            )
+            user = User.objects.get(pk=uid)
 
         except (
             TypeError,
@@ -68,16 +66,8 @@ class VerifyEmailView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if user.is_active:
-            return Response(
-                {"detail": "Email is already verified."},
-                status=status.HTTP_200_OK,
-            )
-
         user.is_active = True
-        user.save(
-            update_fields=["is_active"]
-        )
+        user.save(update_fields=["is_active"])
 
         return Response(
             {"detail": "Email successfully verified."},

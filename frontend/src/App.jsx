@@ -7,6 +7,7 @@ import Expenses from "./pages/Expenses";
 import Budget from "./pages/Budget";
 import Statistics from "./pages/Statistics";
 import Profile from "./pages/Profile";
+import VerifyEmail from "./pages/VerifyEmail";
 /* Context Import */
 import { FinanceProvider } from "./context/FinanceContext";
 
@@ -24,6 +25,7 @@ function App() {
 
             <Route path="/budget" element={<Budget />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
           </Routes>
         </MainLayout>
       </BrowserRouter>

@@ -22,6 +22,8 @@ def send_verification_email(user):
         f"&token={token}"
     )
 
+    print("Verification url:", verification_url)
+
     send_mail(
         subject="Confirm your Finance Tracker account",
         message=(
