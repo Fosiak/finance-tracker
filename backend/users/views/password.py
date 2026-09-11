@@ -1,56 +1,30 @@
 from django.contrib.auth import get_user_model
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
-from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.exceptions import TokenError
-from users.services.security import (
-    log_logout,
-    log_password_changed,
-    log_password_reset,
-    log_email_verified,
+from rest_framework_simplejwt.token_blacklist.models import (
+    OutstandingToken,
+    BlacklistedToken,
 )
 
-
-from .auth_serializers import SecureTokenObtainPairSerializer
-from .email_verification import verify_email_verification_token
-from .serializers import (
-    RegisterSerializer,
-    ProfileSerializer,
+from users.serializers.password import (
     ChangePasswordSerializer,
     PasswordResetRequestSerializer,
     PasswordResetConfirmSerializer,
-    LogoutSerializer)
+)
+from users.services.security import (
+    log_password_changed,
+    log_password_reset,
+)
 
-from .emails import send_password_reset_email
-from .password_reset import verify_password_reset_token
+from users.services.email import send_password_reset_email
+from users.services.password_reset import verify_password_reset_token
+
 
 User = get_user_model()
-
-
-class RegisterView(generics.CreateAPIView):
-    serializer_class = RegisterSerializer
-    permission_classes = [AllowAny]
-    throttle_scope = "register"
-
-
-class SecureLoginView(TokenObtainPairView):
-    serializer_class = SecureTokenObtainPairSerializer
-    permission_classes = [AllowAny]
-    throttle_scope = "login"
-
-
-class ProfileView(generics.RetrieveUpdateAPIView):
-    queryset = User.objects.all()
-    serializer_class = ProfileSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_object(self):
-        return self.request.user
 
 
 class ChangePasswordView(generics.GenericAPIView):
@@ -77,7 +51,9 @@ class ChangePasswordView(generics.GenericAPIView):
         for token in OutstandingToken.objects.filter(
             user=user
         ):
-            BlacklistedToken.objects.get_or_create(token=token)
+            BlacklistedToken.objects.get_or_create(
+                token=token
+            )
 
         return Response(
             {
@@ -85,9 +61,6 @@ class ChangePasswordView(generics.GenericAPIView):
             },
             status=status.HTTP_200_OK,
         )
-
-    def get_object(self):
-        return self.request.user
 
 
 class PasswordResetRequestView(generics.GenericAPIView):
@@ -105,7 +78,7 @@ class PasswordResetRequestView(generics.GenericAPIView):
 
         user = User.objects.filter(
             email=email,
-            is_active=True
+            is_active=True,
         ).first()
 
         if user:
@@ -181,6 +154,7 @@ class PasswordResetConfirmView(generics.GenericAPIView):
         user.save(
             update_fields=["password"]
         )
+
         log_password_reset(user)
 
         for token in OutstandingToken.objects.filter(
@@ -193,98 +167,6 @@ class PasswordResetConfirmView(generics.GenericAPIView):
         return Response(
             {
                 "detail": "Password has been reset successfully."
-            },
-            status=status.HTTP_200_OK,
-        )
-
-
-class VerifyEmailView(generics.GenericAPIView):
-    permission_classes = [AllowAny]
-
-    def get(self, request, uidb64, token):
-        try:
-            uid = force_str(
-                urlsafe_base64_decode(uidb64)
-            )
-
-            user = User.objects.get(pk=uid)
-
-        except (
-            TypeError,
-            ValueError,
-            OverflowError,
-            User.DoesNotExist,
-        ):
-            return Response(
-                {"detail": "Invalid verification link."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        if not verify_email_verification_token(
-            user,
-            token,
-        ):
-            return Response(
-                {"detail": "Invalid verification link."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        if user.is_active:
-            return Response(
-                {"detail": "Email is already verified."},
-                status=status.HTTP_200_OK,
-            )
-
-        user.is_active = True
-        user.email_verified = True
-        user.save(
-            update_fields=[
-                "is_active",
-                "email_verified",
-            ]
-        )
-        log_email_verified(user)
-
-        return Response(
-            {"detail": "Email successfully verified."},
-            status=status.HTTP_200_OK,
-        )
-
-
-class LogoutView(generics.GenericAPIView):
-    serializer_class = LogoutSerializer
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        serializer = self.get_serializer(
-            data=request.data,
-        )
-
-        serializer.is_valid(
-            raise_exception=True,
-        )
-
-        refresh_token = serializer.validated_data["refresh"]
-
-        try:
-            token = RefreshToken(refresh_token)
-
-            if token["user_id"] != str(request.user.pk):
-                raise TokenError("Token does not belong to user.")
-            token.blacklist()
-            log_logout(request.user)
-
-        except TokenError:
-            return Response(
-                {
-                    "detail": "Invalid refresh token."
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        return Response(
-            {
-                "detail": "Successfully logged out."
             },
             status=status.HTTP_200_OK,
         )

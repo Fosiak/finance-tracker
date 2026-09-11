@@ -1,12 +1,12 @@
-from users.serializers import PasswordResetRequestSerializer
+from users.serializers.password import PasswordResetRequestSerializer
 import pytest
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
-from users.password_reset import (
+from users.services.password_reset import (
     generate_password_reset_token,
     verify_password_reset_token,
 )
-from users.serializers import PasswordResetConfirmSerializer
+from users.serializers.password import PasswordResetConfirmSerializer
 
 
 @pytest.mark.django_db

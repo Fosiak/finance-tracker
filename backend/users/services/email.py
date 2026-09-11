@@ -3,9 +3,7 @@ from django.core.mail import send_mail
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
-from .email_verification import (
-    generate_email_verification_token,
-)
+from .email_verification import generate_email_verification_token
 from .password_reset import generate_password_reset_token
 
 
@@ -49,7 +47,7 @@ def send_password_reset_email(user):
     reset_url = (
         f"{settings.FRONTEND_URL}"
         f"/reset-password/"
-        "?uid={uidb64}"
+        f"?uid={uidb64}"
         f"&token={token}"
     )
 
@@ -65,5 +63,5 @@ def send_password_reset_email(user):
         ),
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[user.email],
-        fail_silently=False
+        fail_silently=False,
     )

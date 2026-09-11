@@ -6,7 +6,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from rest_framework.test import APIClient
 
-from users.email_verification import (
+from users.services.email_verification import (
     generate_email_verification_token,
 )
 
