@@ -228,3 +228,44 @@ def test_registration_does_not_create_user_with_invalid_data(api_client):
 
     assert response.status_code == 400
     assert User.objects.count() == 0
+
+
+
+@pytest.mark.django_db
+def test_registration_normalizes_email(api_client):
+    response = api_client.post(
+        "/api/auth/register/",
+        {
+            "username": "testuser",
+            "email": "  TEST@ExAMPLE.COM",
+            "password": "StrongPassword123!",
+            "password_confirm": "StrongPassword123!",
+        },
+        format="json",
+    )
+
+    assert response.status_code == 201
+
+    user = User.objects.get(username="testuser")
+
+    assert user.email == "test@example.com"
+
+
+@pytest.mark.django_db
+def test_registration_normalizes_username(api_client):
+    response = api_client.post(
+        "/api/auth/register/",
+        {
+            "username": "    testuser  ",
+            "email": "test@example.com",
+            "password": "StrongPassword123!",
+            "password_confirm": "StrongPassword123!",
+        },
+        format="json",
+    )
+
+    assert response.status_code == 201
+
+    user = User.objects.get(username="testuser")
+
+    assert user.username == "testuser"

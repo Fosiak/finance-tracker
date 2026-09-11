@@ -16,6 +16,14 @@ def avatar_upload_path(instance, filename):
     )
 
 class User(AbstractUser):
+    email = models.EmailField(
+        unique=True,
+    )
+
+    email_verified = models.BooleanField(
+        default=False,
+    )
+
     avatar = models.ImageField(
         upload_to=avatar_upload_path,
         blank=True,
