@@ -1,4 +1,5 @@
 
+import sys
 from pathlib import Path
 from datetime import timedelta
 
@@ -20,11 +21,44 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
 
+SECURE_SSL_REDIRECT = env.bool(
+    "DJANGO_SECURE_SSL_REDIRECT",
+    default=False,
+)
+
+SESSION_COOKIE_SECURE = env.bool(
+    "DJANGO_SESSION_COOKIE_SECURE",
+    default=False,
+)
+
+CSRF_COOKIE_SECURE = env.bool(
+    "DJANGO_CSRF_COOKIE_SECURE",
+    default=False,
+)
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+X_FRAME_OPTIONS = "DENY"
+
+SECURE_HSTS_SECONDS = env.int(
+    "DJANGO_SECURE_HSTS_SECONDS",
+    default=0,
+)
+
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool(
+    "DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS",
+    default=False,
+)
+
+SECURE_HSTS_PRELOAD = env.bool(
+    "DJANGO_SECURE_HSTS_PRELOAD",
+    default=False,
+)
+
 ALLOWED_HOSTS = env.list(
     "DJANGO_ALLOWED_HOSTS",
     default=[],
 )
-
 
 
 # Application definition
@@ -142,6 +176,10 @@ CORS_ALLOWED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS",
     default=[],
 )
+CSRF_TRUSTED_ORIGINS = env.list(
+    "CSRF_TRUSTED_ORIGINS",
+    default=[],
+)
 
 AUTH_USER_MODEL = "users.User"
 
@@ -156,11 +194,11 @@ REST_FRAMEWORK = {
 
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 
-"DEFAULT_THROTTLE_CLASSES": (
-    "rest_framework.throttling.AnonRateThrottle",
-    "rest_framework.throttling.UserRateThrottle",
-    "rest_framework.throttling.ScopedRateThrottle",
-),
+    "DEFAULT_THROTTLE_CLASSES": (
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.ScopedRateThrottle",
+    ),
 
     "DEFAULT_THROTTLE_RATES": {
         "anon": "100/hour",
@@ -212,6 +250,37 @@ DEFAULT_FROM_EMAIL = env(
     default="no-reply@localhost",
 )
 
-import sys 
 if "pytest" in sys.modules:
     REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"] = []
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "formatters": {
+        "security": {
+            "format": (
+                "{asctime} | {levelname} | "
+                "{name} | {message}"
+            ),
+            "style": "{",
+        },
+    },
+
+    "handlers": {
+        "security_file": {
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "security.log",
+            "formatter": "security",
+        },
+    },
+
+    "loggers": {
+        "security": {
+            "handlers": ["security_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}

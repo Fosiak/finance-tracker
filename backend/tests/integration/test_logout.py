@@ -44,6 +44,7 @@ def test_logout_revokes_refresh_token(
 
     assert refresh_response.status_code == 401
 
+
 @pytest.mark.django_db
 def test_logout_rejects_invalid_refresh_token(
     api_client,
@@ -74,6 +75,7 @@ def test_logout_rejects_invalid_refresh_token(
 
     assert response.status_code == 400
 
+
 @pytest.mark.django_db
 def test_logout_requires_authentication(
     api_client,
@@ -81,10 +83,9 @@ def test_logout_requires_authentication(
     response = api_client.post(
         "/api/auth/logout/",
         {
-            "refresh":"some-refresh-token",
+            "refresh": "some-refresh-token",
         },
         format="json",
     )
 
     assert response.status_code == 401
-

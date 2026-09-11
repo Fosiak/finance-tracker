@@ -1,5 +1,9 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
+from users.services.security import (
+    log_login_success,
+    log_login_failed,
+)
 
 
 class SecureTokenObtainPairSerializer(
@@ -7,9 +11,15 @@ class SecureTokenObtainPairSerializer(
 ):
     def validate(self, attrs):
         try:
-            return super().validate(attrs)
+            data = super().validate(attrs)
+
+            log_login_success(self.user)
+
+            return data
+
         except AuthenticationFailed:
-            # SECURITY: zawsze ten sam komunikat.
-            raise AuthenticationFailed(
-                "Nieprawidłowy login lub hasło."
+            log_login_failed(
+                attrs.get("username", "")
             )
+
+            raise AuthenticationFailed("Nieprawidłowy login lub hasło")

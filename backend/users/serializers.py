@@ -5,12 +5,13 @@ from rest_framework.validators import UniqueValidator
 
 from .emails import send_verification_email
 
+from users.services.security import log_email_changed
 
 User = get_user_model()
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    
+
     email = serializers.EmailField(
         required=True,
         validators=[
@@ -52,8 +53,6 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         return value
 
-    
-
     def validate(self, attrs):
         if attrs["password"] != attrs["password_confirm"]:
             raise serializers.ValidationError(
@@ -78,7 +77,6 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         return user
 
-    
     def validate_email(self, value):
         return value.strip().lower()
 
@@ -135,7 +133,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             instance.is_active = False
 
             instance.save(
-                update_fields = [
+                update_fields=[
                     "email",
                     "email_verified",
                     "is_active",
@@ -144,11 +142,14 @@ class ProfileSerializer(serializers.ModelSerializer):
 
             send_verification_email(instance)
 
+            log_email_changed(instance)
+
             validated_data.pop("email", None)
 
         return super().update(
             instance, validated_data
         )
+
 
 class ChangePasswordSerializer(serializers.Serializer):
     current_password = serializers.CharField(
@@ -199,14 +200,15 @@ class ChangePasswordSerializer(serializers.Serializer):
         if attrs["current_password"] == attrs["new_password"]:
             raise serializers.ValidationError(
                 {
-                "new_password": (
-                    "New password must be different"
-                    "from the current password. "
-                )
-            }
-        )
+                    "new_password": (
+                        "New password must be different"
+                        "from the current password. "
+                    )
+                }
+            )
 
         return attrs
+
 
 class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField(

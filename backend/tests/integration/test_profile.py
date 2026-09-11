@@ -210,6 +210,7 @@ def test_profile_normalizes_email(
 
     assert user.email == "new@example.com"
 
+
 @pytest.mark.django_db
 def test_user_can_change_email(api_client, user):
     authenticate(
@@ -233,6 +234,7 @@ def test_user_can_change_email(api_client, user):
     assert user.is_active is False
     assert len(mail.outbox) == 1
 
+
 @pytest.mark.django_db
 def test_user_cannot_change_email_to_existing_email(
     api_client,
@@ -248,7 +250,7 @@ def test_user_cannot_change_email_to_existing_email(
     response = api_client.patch(
         "/api/auth/profile/",
         {"email": "other@example.com"},
-        format = "json",
+        format="json",
     )
 
     assert response.status_code == 400
@@ -261,13 +263,13 @@ def test_user_cannot_change_email_to_existing_email(
 
 @pytest.mark.django_db
 def test_profile_email_change_normalizes_email(
-    api_client,user
+    api_client, user
 ):
     authenticate(api_client, "testuser", "StrongPassword123!",)
 
     response = api_client.patch(
         "/api/auth/profile/",
-        {"email":"   NEW@EXAMPLE.COM  "},
+        {"email": "   NEW@EXAMPLE.COM  "},
         format="json"
     )
 
@@ -277,6 +279,7 @@ def test_profile_email_change_normalizes_email(
     assert user.email == "new@example.com"
     assert user.email_verified is False
     assert user.is_active is False
+
 
 @pytest.mark.django_db
 def test_changed_email_can_be_verified(api_client, user):

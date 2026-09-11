@@ -8,6 +8,7 @@ from .email_verification import (
 )
 from .password_reset import generate_password_reset_token
 
+
 def send_verification_email(user):
     uidb64 = urlsafe_base64_encode(
         force_bytes(user.pk)
@@ -37,6 +38,7 @@ def send_verification_email(user):
         fail_silently=False,
     )
 
+
 def send_password_reset_email(user):
     uidb64 = urlsafe_base64_encode(
         force_bytes(user.pk)
@@ -61,7 +63,7 @@ def send_password_reset_email(user):
             "If you did not request a password reset, "
             "you can ignore this email."
         ),
-        from_email = settings.DEFAULT_FROM_EMAIL,
+        from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[user.email],
         fail_silently=False
     )

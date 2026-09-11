@@ -8,12 +8,19 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
+from users.services.security import (
+    log_logout,
+    log_password_changed,
+    log_password_reset,
+    log_email_verified,
+)
+
 
 from .auth_serializers import SecureTokenObtainPairSerializer
 from .email_verification import verify_email_verification_token
 from .serializers import (
-    RegisterSerializer, 
-    ProfileSerializer, 
+    RegisterSerializer,
+    ProfileSerializer,
     ChangePasswordSerializer,
     PasswordResetRequestSerializer,
     PasswordResetConfirmSerializer,
@@ -41,9 +48,10 @@ class ProfileView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_object(self):
         return self.request.user
+
 
 class ChangePasswordView(generics.GenericAPIView):
     serializer_class = ChangePasswordSerializer
@@ -64,6 +72,7 @@ class ChangePasswordView(generics.GenericAPIView):
             serializer.validated_data["new_password"]
         )
         user.save(update_fields=["password"])
+        log_password_changed(user)
 
         for token in OutstandingToken.objects.filter(
             user=user
@@ -73,12 +82,13 @@ class ChangePasswordView(generics.GenericAPIView):
         return Response(
             {
                 "detail": "Password changed successfully."
-            }, 
+            },
             status=status.HTTP_200_OK,
         )
 
     def get_object(self):
         return self.request.user
+
 
 class PasswordResetRequestView(generics.GenericAPIView):
     serializer_class = PasswordResetRequestSerializer
@@ -94,8 +104,8 @@ class PasswordResetRequestView(generics.GenericAPIView):
         email = serializer.validated_data["email"]
 
         user = User.objects.filter(
-            email = email,
-            is_active = True
+            email=email,
+            is_active=True
         ).first()
 
         if user:
@@ -171,6 +181,7 @@ class PasswordResetConfirmView(generics.GenericAPIView):
         user.save(
             update_fields=["password"]
         )
+        log_password_reset(user)
 
         for token in OutstandingToken.objects.filter(
             user=user
@@ -185,6 +196,7 @@ class PasswordResetConfirmView(generics.GenericAPIView):
             },
             status=status.HTTP_200_OK,
         )
+
 
 class VerifyEmailView(generics.GenericAPIView):
     permission_classes = [AllowAny]
@@ -231,11 +243,13 @@ class VerifyEmailView(generics.GenericAPIView):
                 "email_verified",
             ]
         )
+        log_email_verified(user)
 
         return Response(
             {"detail": "Email successfully verified."},
             status=status.HTTP_200_OK,
         )
+
 
 class LogoutView(generics.GenericAPIView):
     serializer_class = LogoutSerializer
@@ -258,6 +272,7 @@ class LogoutView(generics.GenericAPIView):
             if token["user_id"] != str(request.user.pk):
                 raise TokenError("Token does not belong to user.")
             token.blacklist()
+            log_logout(request.user)
 
         except TokenError:
             return Response(
@@ -269,7 +284,7 @@ class LogoutView(generics.GenericAPIView):
 
         return Response(
             {
-                "detail":"Successfully logged out."
+                "detail": "Successfully logged out."
             },
             status=status.HTTP_200_OK,
         )

@@ -230,7 +230,6 @@ def test_registration_does_not_create_user_with_invalid_data(api_client):
     assert User.objects.count() == 0
 
 
-
 @pytest.mark.django_db
 def test_registration_normalizes_email(api_client):
     response = api_client.post(

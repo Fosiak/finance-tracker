@@ -6,7 +6,6 @@ from django.db import models
 from .validators import validate_avatar
 
 
-
 def avatar_upload_path(instance, filename):
     extension = filename.rsplit(".", 1)[-1].lower()
 
@@ -14,6 +13,7 @@ def avatar_upload_path(instance, filename):
         f"avatars/{instance.pk}/"
         f"{uuid.uuid4()}.{extension}"
     )
+
 
 class User(AbstractUser):
     email = models.EmailField(
