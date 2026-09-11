@@ -5,6 +5,7 @@ from .views import (
     RegisterView,
     SecureLoginView,
     ProfileView,
+    VerifyEmailView,
 )
 
 
@@ -31,5 +32,10 @@ urlpatterns = [
         "profile/",
         ProfileView.as_view(),
         name="profile",
+    ),
+    path(
+        "verify-email/<uidb64>/<token>/",
+        VerifyEmailView.as_view(),
+        name="verify_email",
     ),
 ]
