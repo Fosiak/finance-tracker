@@ -1,32 +1,26 @@
-import { Wallet } from "lucide-react";
+import { TrendingDown } from "lucide-react";
 import { useFinance } from "../context/FinanceContext";
 
-function BalanceCard() {
+function ExpenseCard() {
   const { selectedMonthExpenses } = useFinance();
-
-  const income = selectedMonthExpenses
-    .filter((expense) => expense.type === "income")
-    .reduce((total, expense) => total + expense.amount, 0);
 
   const expenses = selectedMonthExpenses
     .filter((expense) => expense.type === "expense")
     .reduce((total, expense) => total + expense.amount, 0);
 
-  const balance = income - expenses;
-
   return (
     <div className="rounded-2xl border border-border-default bg-surface p-6 shadow-card">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-slate-500">Balance</p>
+          <p className="text-sm text-slate-500">Expenses</p>
 
           <p className="mt-2 text-3xl font-semibold tracking-tight text-white">
-            {balance.toFixed(2)} zł
+            -{expenses.toFixed(2)} zł
           </p>
         </div>
 
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          <Wallet size={20} />
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-500/10 text-red-400">
+          <TrendingDown size={20} />
         </div>
       </div>
 
@@ -35,4 +29,4 @@ function BalanceCard() {
   );
 }
 
-export default BalanceCard;
+export default ExpenseCard;

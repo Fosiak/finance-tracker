@@ -1,14 +1,47 @@
+
 @import "tailwindcss";
 
-:root {
-  font-family: Inter, system-ui, sans-serif;
-  color: #f5f5f5;
-  background: #0f0f0f;
+@theme {
+  /* ─────────────────────────────
+     Finance Tracker — Colors
+     ───────────────────────────── */
+
+  --color-app: #09090b;
+  --color-surface: #111113;
+  --color-surface-secondary: #0f172a;
+
+  --color-border-subtle: rgb(255 255 255 / 0.06);
+  --color-border-default: rgb(255 255 255 / 0.08);
+  --color-border-strong: rgb(255 255 255 / 0.12);
+
+  --color-primary: #2563eb;
+  --color-primary-hover: #3b82f6;
+
+  --color-accent-indigo: #6366f1;
+  --color-accent-violet: #8b5cf6;
+
+  /* ─────────────────────────────
+     Finance Tracker — Shadows
+     ───────────────────────────── */
+
+  --shadow-card:
+    0 25px 50px -12px rgb(0 0 0 / 0.4);
+
+  --shadow-primary:
+    0 10px 30px rgb(37 99 235 / 0.1);
+
+  /* ─────────────────────────────
+     Finance Tracker — Radius
+     ───────────────────────────── */
+
+  --radius-card: 1.5rem;
+  --radius-panel: 1rem;
+  --radius-control: 0.75rem;
+
+  /* ─────────────────────────────
+     Finance Tracker — Animation
+     ───────────────────────────── */
+
+  --ease-finance: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  background: #0f0f0f;
-}
