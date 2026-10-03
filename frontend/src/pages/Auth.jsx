@@ -249,7 +249,7 @@ function Auth() {
                       Register
                     </button>
                   </div>
-                  {authMessageMessage && (
+                  {authMessage && (
                     <div
                       role="alert"
                       className="mb-6 rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-3 text-sm text-blue-300"
