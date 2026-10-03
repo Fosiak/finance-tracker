@@ -21,7 +21,7 @@ from users.services.security import (
 )
 
 from users.services.email import send_password_reset_email
-from users.services.password_reset import verify_password_reset_token
+from users.services.password_reset import get_valid_password_reset_token
 
 
 User = get_user_model()
@@ -126,10 +126,12 @@ class PasswordResetConfirmView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if not verify_password_reset_token(
+        reset_token = get_valid_password_reset_token(
             user,
             request.data.get("token", ""),
-        ):
+        )
+
+        if reset_token is None:
             return Response(
                 {"detail": "Invalid password reset link."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -154,6 +156,8 @@ class PasswordResetConfirmView(generics.GenericAPIView):
         user.save(
             update_fields=["password"]
         )
+
+        reset_token.mark_used()
 
         log_password_reset(user)
 

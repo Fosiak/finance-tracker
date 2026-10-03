@@ -8,7 +8,9 @@ from rest_framework.response import Response
 
 from users.services.security import log_email_verified
 
-from users.services.email_verification import verify_email_verification_token
+from users.services.email_verification import (
+    get_valid_email_verification_token,
+)
 
 
 User = get_user_model()
@@ -36,16 +38,20 @@ class VerifyEmailView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if not verify_email_verification_token(
+        verification_token = get_valid_email_verification_token(
             user,
             token,
-        ):
+        )
+
+        if verification_token is None:
             return Response(
                 {"detail": "Invalid verification link."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         if user.is_active:
+            verification_token.mark_used()
+
             return Response(
                 {"detail": "Email is already verified."},
                 status=status.HTTP_200_OK,
@@ -60,6 +66,8 @@ class VerifyEmailView(generics.GenericAPIView):
                 "email_verified",
             ]
         )
+
+        verification_token.mark_used()
 
         log_email_verified(user)
 

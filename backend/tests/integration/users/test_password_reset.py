@@ -313,6 +313,113 @@ def test_password_reset_revokes_existing_refresh_token(
 
 
 @pytest.mark.django_db
+def test_password_reset_token_cannot_be_replayed(
+    api_client,
+    user,
+):
+    uidb64 = urlsafe_base64_encode(
+        force_bytes(user.pk)
+    )
+
+    token = generate_password_reset_token(user)
+
+    first_response = api_client.post(
+        "/api/auth/password-reset-confirm/",
+        {
+            "uid": uidb64,
+            "token": token,
+            "new_password": "NewStrongPassword123!",
+            "new_password_confirm": "NewStrongPassword123!",
+        },
+        format="json",
+    )
+
+    assert first_response.status_code == 200
+
+    second_response = api_client.post(
+        "/api/auth/password-reset-confirm/",
+        {
+            "uid": uidb64,
+            "token": token,
+            "new_password": "AnotherStrongPassword123!",
+            "new_password_confirm": "AnotherStrongPassword123!",
+        },
+        format="json",
+    )
+
+    assert second_response.status_code == 400
+
+    user.refresh_from_db()
+    assert user.check_password("NewStrongPassword123!")
+
+
+@pytest.mark.django_db
+def test_requesting_new_reset_invalidates_previous_token(
+    api_client,
+    user,
+):
+    old_token = generate_password_reset_token(user)
+
+    # Simulates the user requesting a second reset email.
+    generate_password_reset_token(user)
+
+    uidb64 = urlsafe_base64_encode(
+        force_bytes(user.pk)
+    )
+
+    response = api_client.post(
+        "/api/auth/password-reset-confirm/",
+        {
+            "uid": uidb64,
+            "token": old_token,
+            "new_password": "NewStrongPassword123!",
+            "new_password_confirm": "NewStrongPassword123!",
+        },
+        format="json",
+    )
+
+    assert response.status_code == 400
+
+    user.refresh_from_db()
+    assert user.check_password("StrongPassword123!")
+
+
+@pytest.mark.django_db
+def test_email_verification_token_is_rejected_by_password_reset(
+    api_client,
+    user,
+):
+    from users.services.email_verification import (
+        generate_email_verification_token,
+    )
+
+    # SECURITY: a token minted for a different purpose must never
+    # work here, even though both are "AuthToken" rows for the same
+    # user.
+    email_token = generate_email_verification_token(user)
+
+    uidb64 = urlsafe_base64_encode(
+        force_bytes(user.pk)
+    )
+
+    response = api_client.post(
+        "/api/auth/password-reset-confirm/",
+        {
+            "uid": uidb64,
+            "token": email_token,
+            "new_password": "NewStrongPassword123!",
+            "new_password_confirm": "NewStrongPassword123!",
+        },
+        format="json",
+    )
+
+    assert response.status_code == 400
+
+    user.refresh_from_db()
+    assert user.check_password("StrongPassword123!")
+
+
+@pytest.mark.django_db
 def test_user_can_login_with_new_password_after_reset(
     api_client,
     user,
