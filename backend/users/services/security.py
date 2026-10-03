@@ -24,6 +24,13 @@ def log_logout(user):
     )
 
 
+def log_refresh_reuse_detected(user):
+    security_logger.warning(
+        "REFRESH_TOKEN_REUSE_DETECTED user_id=%s",
+        user.pk,
+    )
+
+
 def log_password_changed(user):
     security_logger.info(
         "PASSWORD_CHANGED user_id=%s",
