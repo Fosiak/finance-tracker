@@ -7,6 +7,7 @@ import AuthLayout from "./layouts/AuthLayout";
 import MainLayout from "./layouts/MainLayout";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import HomeRoute from "./components/auth/HomeRoute";
 import CookieNotice from "./components/CookieNotice";
 
 import Auth from "./pages/Auth";
@@ -16,7 +17,6 @@ import Statistics from "./pages/Statistics";
 import Budget from "./pages/Budget";
 import Profile from "./pages/Profile";
 import VerifyEmail from "./pages/VerifyEmail";
-import LandingPage from "./pages/LandingPage";
 import CookiePolicy from "./pages/CookiePolicy";
 
 function App() {
@@ -25,7 +25,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* Public */}
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<HomeRoute />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/cookie-policy" element={<CookiePolicy />} />
