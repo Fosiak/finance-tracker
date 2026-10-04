@@ -1,92 +1,89 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+
+import {
+  getTransactions,
+  createTransaction,
+  updateTransaction as updateTransactionRequest,
+  deleteTransaction as deleteTransactionRequest,
+} from "../services/transactions";
+import { getBudgets, setBudgetForMonth } from "../services/budgets";
 
 const FinanceContext = createContext(null);
 
 function FinanceProvider({ children }) {
-  const [expenses, setExpenses] = useState([
-    {
-      id: 1,
-      type: "expense",
-      amount: 45.99,
-      category: "food",
-      description: "Groceries",
-      date: "2026-09-05",
-    },
-    {
-      id: 2,
-      type: "expense",
-      amount: 120,
-      category: "transport",
-      description: "Fuel",
-      date: "2026-09-04",
-    },
-    {
-      id: 3,
-      type: "expense",
-      amount: 49.99,
-      category: "subscriptions",
-      description: "Netflix",
-      date: "2026-09-02",
-    },
-    {
-      id: 4,
-      type: "expense",
-      amount: 250,
-      category: "shopping",
-      description: "Clothes",
-      date: "2026-08-20",
-    },
-    {
-      id: 5,
-      type: "expense",
-      amount: 80,
-      category: "food",
-      description: "Restaurant",
-      date: "2026-08-15",
-    },
-  ]);
-
+  const [expenses, setExpenses] = useState([]);
+  const [budgets, setBudgets] = useState({});
   const [selectedMonth, setSelectedMonth] = useState("2026-09");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const [budgets, setBudgets] = useState({
-    "2026-08": 3000,
-    "2026-09": 3000,
-  });
+  useEffect(() => {
+    let isCancelled = false;
 
-  function addExpense(expense) {
-    setExpenses((currentExpenses) => [expense, ...currentExpenses]);
+    async function loadData() {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const [transactions, budgetList] = await Promise.all([
+          getTransactions(),
+          getBudgets(),
+        ]);
+
+        if (isCancelled) return;
+
+        setExpenses(transactions);
+
+        setBudgets(
+          Object.fromEntries(
+            budgetList.map((budget) => [budget.month, budget.limit]),
+          ),
+        );
+      } catch (err) {
+        if (!isCancelled) setError(err.message);
+      } finally {
+        if (!isCancelled) setIsLoading(false);
+      }
+    }
+
+    loadData();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  async function addExpense(expense) {
+    const { id: _ignoredClientId, ...payload } = expense;
+    const created = await createTransaction(payload);
+    setExpenses((current) => [created, ...current]);
   }
 
-  function deleteExpense(id) {
-    setExpenses((currentExpenses) =>
-      currentExpenses.filter((expense) => expense.id !== id),
+  async function deleteExpense(id) {
+    await deleteTransactionRequest(id);
+    setExpenses((current) => current.filter((expense) => expense.id !== id));
+  }
+
+  async function updateExpense(updatedExpense) {
+    const { id, ...payload } = updatedExpense;
+    const saved = await updateTransactionRequest(id, payload);
+    setExpenses((current) =>
+      current.map((expense) => (expense.id === id ? saved : expense)),
     );
   }
 
-  function updateExpense(updatedExpense) {
-    setExpenses((currentExpenses) =>
-      currentExpenses.map((expense) =>
-        expense.id === updatedExpense.id ? updatedExpense : expense,
-      ),
-    );
-  }
-
-  function getExpensesForMonth(month) {
-    return expenses.filter((expense) => expense.date.startsWith(month));
-  }
-
-  function setBudget(month, amount) {
-    setBudgets((currentBudgets) => ({
-      ...currentBudgets,
-      [month]: amount,
-    }));
+  async function setBudget(month, amount) {
+    const saved = await setBudgetForMonth(month, amount);
+    setBudgets((current) => ({ ...current, [month]: saved.limit }));
   }
 
   function getBudgetForMonth(month) {
     return budgets[month] ?? 0;
   }
 
-  const selectedMonthExpenses = getExpensesForMonth(selectedMonth);
+  const selectedMonthExpenses = expenses.filter((expense) =>
+    expense.date.startsWith(selectedMonth),
+  );
 
   const selectedMonthBudget = getBudgetForMonth(selectedMonth);
 
@@ -106,6 +103,9 @@ function FinanceProvider({ children }) {
         addExpense,
         deleteExpense,
         updateExpense,
+
+        isLoading,
+        error,
       }}
     >
       {children}

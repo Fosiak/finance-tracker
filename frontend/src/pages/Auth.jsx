@@ -71,7 +71,7 @@ function Auth() {
       if (isLogin) {
         await login(username, password);
 
-        const destination = location.state?.from?.pathname || "/";
+        const destination = location.state?.from?.pathname || "/dashboard";
 
         navigate(destination, { replace: true });
 
