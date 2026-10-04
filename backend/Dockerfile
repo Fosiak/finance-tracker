@@ -1,0 +1,33 @@
+FROM python:3.13-slim-bookworm
+
+# Don't buffer stdout/stderr and don't write .pyc files in the container.
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# libmagic1 provides the shared library that python-magic binds to
+# (required by users/validators.py for true MIME-type sniffing of
+# uploaded avatars). This is the reason the backend is deployed via a
+# Dockerfile instead of Render's native Python buildpack.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libmagic1 && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+# Run as a non-root user.
+RUN useradd --create-home appuser
+USER appuser
+
+EXPOSE 8000
+
+# collectstatic and migrate need DJANGO_SECRET_KEY/DATABASE_URL, which are
+# only injected at runtime on Render (not during `docker build`), so they
+# run here in the start command rather than as a RUN step.
+CMD python manage.py collectstatic --noinput && \
+    python manage.py migrate --noinput && \
+    gunicorn config.wsgi:application --bind 0.0.0.0:8000
