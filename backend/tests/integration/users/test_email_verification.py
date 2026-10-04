@@ -1,6 +1,7 @@
 import pytest
 
 from django.contrib.auth import get_user_model
+from django.core import mail
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
@@ -24,7 +25,7 @@ def test_changed_email_can_be_verified(api_client):
         username="testuser",
         email="new@example.com",
         password="StrongPassword123!",
-        is_active=False,
+        is_active=True,
         email_verified=False,
     )
 
@@ -58,7 +59,7 @@ def test_verification_token_cannot_be_replayed(api_client):
         username="testuser",
         email="new@example.com",
         password="StrongPassword123!",
-        is_active=False,
+        is_active=True,
         email_verified=False,
     )
 
@@ -79,10 +80,10 @@ def test_verification_token_cannot_be_replayed(api_client):
     first_response = api_client.get(url)
     assert first_response.status_code == 200
 
-    # Reset is_active so a "replay" would actually re-trigger
-    # activation logic if the token were still considered valid.
-    user.is_active = False
-    user.save(update_fields=["is_active"])
+    # Reset email_verified so a "replay" would actually re-trigger
+    # verification logic if the token were still considered valid.
+    user.email_verified = False
+    user.save(update_fields=["email_verified"])
 
     second_response = api_client.get(url)
 
@@ -96,7 +97,7 @@ def test_resending_verification_invalidates_previous_token(api_client):
         username="testuser",
         email="new@example.com",
         password="StrongPassword123!",
-        is_active=False,
+        is_active=True,
         email_verified=False,
     )
 
@@ -122,4 +123,48 @@ def test_resending_verification_invalidates_previous_token(api_client):
     assert response.status_code == 400
 
     user.refresh_from_db()
-    assert user.is_active is False
+    assert user.email_verified is False
+
+
+@pytest.mark.django_db
+def test_resend_verification_email_sends_new_email(api_client):
+    user = User.objects.create_user(
+        username="testuser",
+        email="test@example.com",
+        password="StrongPassword123!",
+        is_active=True,
+        email_verified=False,
+    )
+
+    api_client.force_authenticate(user=user)
+
+    response = api_client.post("/api/auth/resend-verification/")
+
+    assert response.status_code == 200
+    assert len(mail.outbox) == 1
+    assert mail.outbox[0].to == ["test@example.com"]
+
+
+@pytest.mark.django_db
+def test_resend_verification_email_requires_authentication(api_client):
+    response = api_client.post("/api/auth/resend-verification/")
+
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_resend_verification_email_noop_if_already_verified(api_client):
+    user = User.objects.create_user(
+        username="testuser",
+        email="test@example.com",
+        password="StrongPassword123!",
+        is_active=True,
+        email_verified=True,
+    )
+
+    api_client.force_authenticate(user=user)
+
+    response = api_client.post("/api/auth/resend-verification/")
+
+    assert response.status_code == 200
+    assert len(mail.outbox) == 0

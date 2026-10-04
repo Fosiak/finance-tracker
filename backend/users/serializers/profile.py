@@ -26,6 +26,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "id",
             "username",
             "email",
+            "email_verified",
             "first_name",
             "last_name",
             "avatar",
@@ -33,6 +34,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "id",
             "username",
+            "email_verified",
         ]
 
     def validate_email(self, value):
@@ -51,13 +53,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         if email_changed:
             instance.email = new_email
             instance.email_verified = False
-            instance.is_active = False
 
             instance.save(
                 update_fields=[
                     "email",
                     "email_verified",
-                    "is_active",
                 ]
             )
 

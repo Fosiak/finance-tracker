@@ -45,6 +45,28 @@ def test_user_can_login(api_client, active_user):
 
 
 @pytest.mark.django_db
+def test_unverified_user_can_still_login(api_client):
+    User.objects.create_user(
+        username="unverified",
+        email="unverified@example.com",
+        password="StrongPassword123!",
+        is_active=True,
+        email_verified=False,
+    )
+
+    response = api_client.post(
+        "/api/auth/login/",
+        {
+            "username": "unverified",
+            "password": "StrongPassword123!",
+        },
+        format="json",
+    )
+
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
 def test_login_rejects_wrong_password(api_client, active_user):
     response = api_client.post(
         "/api/auth/login/",

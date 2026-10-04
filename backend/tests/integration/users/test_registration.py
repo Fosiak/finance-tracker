@@ -33,7 +33,8 @@ def test_user_can_register(api_client):
     assert user.email == "test@example.com"
     assert user.first_name == "Test"
     assert user.last_name == "User"
-    assert user.is_active is False
+    assert user.is_active is True
+    assert user.email_verified is False
 
 
 @pytest.mark.django_db
