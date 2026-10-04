@@ -7,6 +7,7 @@ import AuthLayout from "./layouts/AuthLayout";
 import MainLayout from "./layouts/MainLayout";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import CookieNotice from "./components/CookieNotice";
 
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -16,6 +17,7 @@ import Budget from "./pages/Budget";
 import Profile from "./pages/Profile";
 import VerifyEmail from "./pages/VerifyEmail";
 import LandingPage from "./pages/LandingPage";
+import CookiePolicy from "./pages/CookiePolicy";
 
 function App() {
   return (
@@ -26,6 +28,7 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/cookie-policy" element={<CookiePolicy />} />
 
           {/* Protected — FinanceProvider only mounts once ProtectedRoute
               has confirmed the user is authenticated, so its data fetch
@@ -46,6 +49,8 @@ function App() {
             </Route>
           </Route>
         </Routes>
+
+        <CookieNotice />
       </BrowserRouter>
     </AuthProvider>
   );

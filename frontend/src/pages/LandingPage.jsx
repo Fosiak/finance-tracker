@@ -1683,6 +1683,12 @@ function LandingPage() {
             >
               {cta.isAuthenticated ? "Dashboard" : "Login"}
             </Link>
+            <Link
+              to="/cookie-policy"
+              className={`rounded transition hover:text-slate-300 ${focusRing}`}
+            >
+              Cookie Policy
+            </Link>
           </div>
         </div>
       </footer>
