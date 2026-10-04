@@ -11,11 +11,23 @@ function Expenses() {
 
   const [search, setSearch] = useState("");
 
+  const [deletingId, setDeletingId] = useState(null);
+  const [deleteError, setDeleteError] = useState("");
+
   const { selectedMonthExpenses, addExpense, deleteExpense, updateExpense } =
     useFinance();
 
-  function handleDeleteExpense(id) {
-    deleteExpense(id);
+  async function handleDeleteExpense(id) {
+    setDeleteError("");
+    setDeletingId(id);
+
+    try {
+      await deleteExpense(id);
+    } catch (error) {
+      setDeleteError(error.message);
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   function handleEditExpense(expense) {
@@ -23,8 +35,8 @@ function Expenses() {
     setIsModalOpen(true);
   }
 
-  function handleUpdateExpense(updatedExpense) {
-    updateExpense(updatedExpense);
+  async function handleUpdateExpense(updatedExpense) {
+    await updateExpense(updatedExpense);
 
     setEditingExpense(null);
   }
@@ -60,6 +72,16 @@ function Expenses() {
           Add expense
         </button>
       </div>
+
+      {/* Delete error */}
+      {deleteError && (
+        <div
+          role="alert"
+          className="mt-6 rounded-lg border border-red-500/20 bg-red-500/[0.07] px-4 py-3"
+        >
+          <p className="text-sm text-red-400">{deleteError}</p>
+        </div>
+      )}
 
       {/* Search */}
       <div className="mt-8">
@@ -130,7 +152,8 @@ function Expenses() {
 
                 <button
                   onClick={() => handleDeleteExpense(expense.id)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 transition hover:bg-[#222222] hover:text-red-400"
+                  disabled={deletingId === expense.id}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 transition hover:bg-[#222222] hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Trash2 size={16} />
                 </button>

@@ -7,6 +7,9 @@ function AddExpenseModal({ isOpen, onClose, onAddExpense, editingExpense }) {
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
+
   useEffect(() => {
     if (editingExpense) {
       setAmount(editingExpense.amount.toString());
@@ -19,13 +22,15 @@ function AddExpenseModal({ isOpen, onClose, onAddExpense, editingExpense }) {
       setDescription("");
       setDate("");
     }
+
+    setFormError("");
   }, [editingExpense, isOpen]);
 
   if (!isOpen) {
     return null;
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const expense = {
@@ -38,14 +43,23 @@ function AddExpenseModal({ isOpen, onClose, onAddExpense, editingExpense }) {
       date,
     };
 
-    onAddExpense(expense);
+    setFormError("");
+    setIsSubmitting(true);
 
-    setAmount("");
-    setCategory("");
-    setDescription("");
-    setDate("");
+    try {
+      await onAddExpense(expense);
 
-    onClose();
+      setAmount("");
+      setCategory("");
+      setDescription("");
+      setDate("");
+
+      onClose();
+    } catch (error) {
+      setFormError(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -152,21 +166,37 @@ function AddExpenseModal({ isOpen, onClose, onAddExpense, editingExpense }) {
             />
           </div>
 
+          {/* Error */}
+          {formError && (
+            <div
+              role="alert"
+              className="rounded-lg border border-red-500/20 bg-red-500/[0.07] px-4 py-3"
+            >
+              <p className="text-sm text-red-400">{formError}</p>
+            </div>
+          )}
+
           {/* Buttons */}
           <div className="flex justify-end gap-3 border-t border-[#292929] pt-5">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-zinc-400 transition hover:bg-[#222222] hover:text-white"
+              disabled={isSubmitting}
+              className="rounded-lg px-4 py-2.5 text-sm font-medium text-zinc-400 transition hover:bg-[#222222] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>
 
             <button
               type="submit"
-              className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-zinc-200"
+              disabled={isSubmitting}
+              className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {editingExpense ? "Save changes" : "Add expense"}
+              {isSubmitting
+                ? "Saving..."
+                : editingExpense
+                  ? "Save changes"
+                  : "Add expense"}
             </button>
           </div>
         </form>

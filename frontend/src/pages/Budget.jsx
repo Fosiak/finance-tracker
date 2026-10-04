@@ -13,6 +13,8 @@ function Budget() {
   } = useFinance();
 
   const [amount, setAmount] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
     setAmount(selectedMonthBudget ? selectedMonthBudget.toString() : "");
@@ -30,7 +32,7 @@ function Budget() {
       ? Math.min((totalExpenses / selectedMonthBudget) * 100, 100)
       : 0;
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const budgetAmount = Number(amount);
@@ -39,7 +41,16 @@ function Budget() {
       return;
     }
 
-    setBudget(selectedMonth, budgetAmount);
+    setSaveError("");
+    setIsSaving(true);
+
+    try {
+      await setBudget(selectedMonth, budgetAmount);
+    } catch (error) {
+      setSaveError(error.message);
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   const monthName = new Date(`${selectedMonth}-01`).toLocaleString("en-US", {
@@ -165,12 +176,19 @@ function Budget() {
 
             <button
               type="submit"
-              className="flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-zinc-200"
+              disabled={isSaving}
+              className="flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Save size={16} />
-              Save
+              {isSaving ? "Saving..." : "Save"}
             </button>
           </div>
+
+          {saveError && (
+            <p role="alert" className="mt-3 text-sm text-red-400">
+              {saveError}
+            </p>
+          )}
         </form>
       </div>
     </div>
