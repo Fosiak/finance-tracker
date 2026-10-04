@@ -1,10 +1,34 @@
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
 from .email_verification import generate_email_verification_token
 from .password_reset import generate_password_reset_token
+
+
+def _send_templated_email(*, subject, template_name, context, to):
+    context = {
+        "frontend_url": settings.FRONTEND_URL,
+        **context,
+    }
+
+    text_body = render_to_string(
+        f"users/emails/{template_name}.txt", context
+    )
+    html_body = render_to_string(
+        f"users/emails/{template_name}.html", context
+    )
+
+    message = EmailMultiAlternatives(
+        subject=subject,
+        body=text_body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[to],
+    )
+    message.attach_alternative(html_body, "text/html")
+    message.send(fail_silently=False)
 
 
 def send_verification_email(user):
@@ -21,17 +45,11 @@ def send_verification_email(user):
         f"&token={token}"
     )
 
-    send_mail(
+    _send_templated_email(
         subject="Confirm your Finance Tracker account",
-        message=(
-            "Thank you for creating a Finance Tracker account.\n\n"
-            "Confirm your email address by opening this link:\n\n"
-            f"{verification_url}\n\n"
-            "If you did not create this account, you can ignore this email."
-        ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[user.email],
-        fail_silently=False,
+        template_name="verify_email",
+        context={"verification_url": verification_url},
+        to=user.email,
     )
 
 
@@ -49,17 +67,9 @@ def send_password_reset_email(user):
         f"&token={token}"
     )
 
-    send_mail(
+    _send_templated_email(
         subject="Reset your Finance Tracker password",
-        message=(
-            "You requested a password reset for your "
-            "Finance Tracker account.\n\n"
-            "Reset your password by opening this link:\n\n"
-            f"{reset_url}\n\n"
-            "If you did not request a password reset, "
-            "you can ignore this email."
-        ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[user.email],
-        fail_silently=False,
+        template_name="password_reset",
+        context={"reset_url": reset_url},
+        to=user.email,
     )
