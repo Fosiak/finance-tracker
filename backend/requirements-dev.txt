@@ -1,0 +1,8 @@
+-r requirements.txt
+
+# Windows-only libmagic backend for local development (production uses
+# system libmagic1 installed in the Dockerfile, with plain python-magic).
+python-magic-bin==0.4.14; sys_platform == "win32"
+
+pytest==9.1.1
+pytest-django==4.14.0
