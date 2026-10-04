@@ -19,8 +19,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Run as a non-root user.
-RUN useradd --create-home appuser
+# Run as a non-root user. collectstatic/migrate need to write to /app
+# (staticfiles/, media/, db files), so hand ownership to appuser first.
+RUN useradd --create-home appuser && \
+    chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8000
