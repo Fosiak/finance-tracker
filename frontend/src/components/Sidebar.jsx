@@ -13,7 +13,7 @@ import { useAuth } from "../context/AuthContext";
 const navigation = [
   {
     name: "Dashboard",
-    path: "/",
+    path: "/dashboard",
     icon: LayoutDashboard,
   },
   {
