@@ -35,6 +35,12 @@ function AuthProvider({ children }) {
     setUser(profile);
   }
 
+  async function refreshUser() {
+    const profile = await fetchProfile();
+    setUser(profile);
+    return profile;
+  }
+
   async function logout() {
     try {
       await logoutRequest();
@@ -53,6 +59,7 @@ function AuthProvider({ children }) {
         isLoading,
         login,
         logout,
+        refreshUser,
       }}
     >
       {children}

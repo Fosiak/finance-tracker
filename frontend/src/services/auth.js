@@ -28,3 +28,10 @@ export async function logout() {
 export async function fetchProfile() {
   return apiRequest("/api/auth/profile/");
 }
+
+export async function updateProfile(data) {
+  return apiRequest("/api/auth/profile/", {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
