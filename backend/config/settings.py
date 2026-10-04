@@ -44,6 +44,15 @@ CSRF_COOKIE_SECURE = env.bool(
     default=False,
 )
 
+# The csrftoken cookie is set by api.<domain> but read by JS running on
+# app.<domain> (to echo it back as X-CSRFToken), so it needs a shared
+# parent-domain scope - a host-only cookie from api.<domain> is invisible
+# to document.cookie on app.<domain>. Leave unset for local dev.
+CSRF_COOKIE_DOMAIN = env(
+    "DJANGO_CSRF_COOKIE_DOMAIN",
+    default=None,
+)
+
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
 X_FRAME_OPTIONS = "DENY"
