@@ -20,6 +20,7 @@ from users.services.security import (
     log_password_reset,
 )
 
+from users.services.cookies import clear_auth_cookies
 from users.services.email import send_password_reset_email
 from users.services.password_reset import get_valid_password_reset_token
 
@@ -55,12 +56,16 @@ class ChangePasswordView(generics.GenericAPIView):
                 token=token
             )
 
-        return Response(
+        response = Response(
             {
                 "detail": "Password changed successfully."
             },
             status=status.HTTP_200_OK,
         )
+
+        clear_auth_cookies(response)
+
+        return response
 
 
 class PasswordResetRequestView(generics.GenericAPIView):
@@ -168,9 +173,13 @@ class PasswordResetConfirmView(generics.GenericAPIView):
                 token=token
             )
 
-        return Response(
+        response = Response(
             {
                 "detail": "Password has been reset successfully."
             },
             status=status.HTTP_200_OK,
         )
+
+        clear_auth_cookies(response)
+
+        return response

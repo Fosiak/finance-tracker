@@ -1,5 +1,6 @@
 import pytest
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
@@ -32,6 +33,10 @@ def login(api_client):
     )
 
 
+def refresh_cookie_value(response):
+    return response.cookies[settings.AUTH_COOKIE_REFRESH].value
+
+
 @pytest.mark.django_db
 def test_refresh_token_returns_new_tokens(
     api_client,
@@ -41,21 +46,19 @@ def test_refresh_token_returns_new_tokens(
 
     assert login_response.status_code == 200
 
-    old_refresh = login_response.data["refresh"]
+    old_refresh = refresh_cookie_value(login_response)
 
     response = api_client.post(
         "/api/auth/refresh/",
-        {
-            "refresh": old_refresh,
-        },
         format="json",
     )
 
     assert response.status_code == 200
-    assert "access" in response.data
-    assert "refresh" in response.data
 
-    assert response.data["refresh"] != old_refresh
+    assert settings.AUTH_COOKIE_ACCESS in response.cookies
+    assert settings.AUTH_COOKIE_REFRESH in response.cookies
+
+    assert refresh_cookie_value(response) != old_refresh
 
 
 @pytest.mark.django_db
@@ -65,23 +68,19 @@ def test_old_refresh_token_is_blacklisted_after_rotation(
 ):
     login_response = login(api_client)
 
-    old_refresh = login_response.data["refresh"]
+    old_refresh = refresh_cookie_value(login_response)
 
     first_refresh_response = api_client.post(
         "/api/auth/refresh/",
-        {
-            "refresh": old_refresh,
-        },
         format="json",
     )
 
     assert first_refresh_response.status_code == 200
 
+    api_client.cookies[settings.AUTH_COOKIE_REFRESH] = old_refresh
+
     second_refresh_response = api_client.post(
         "/api/auth/refresh/",
-        {
-            "refresh": old_refresh,
-        },
         format="json",
     )
 
@@ -95,37 +94,32 @@ def test_new_refresh_token_can_be_used(
 ):
     login_response = login(api_client)
 
-    old_refresh = login_response.data["refresh"]
+    assert login_response.status_code == 200
 
     refresh_response = api_client.post(
         "/api/auth/refresh/",
-        {
-            "refresh": old_refresh,
-        },
         format="json",
     )
 
-    new_refresh = refresh_response.data["refresh"]
+    assert refresh_response.status_code == 200
 
     second_response = api_client.post(
         "/api/auth/refresh/",
-        {
-            "refresh": new_refresh,
-        },
         format="json",
     )
 
     assert second_response.status_code == 200
-    assert "access" in second_response.data
+    assert settings.AUTH_COOKIE_ACCESS in second_response.cookies
 
 
 @pytest.mark.django_db
 def test_invalid_refresh_token_is_rejected(api_client):
+    api_client.cookies[
+        settings.AUTH_COOKIE_REFRESH
+    ] = "invalid-refresh-token"
+
     response = api_client.post(
         "/api/auth/refresh/",
-        {
-            "refresh": "invalid-refresh-token",
-        },
         format="json",
     )
 
@@ -136,11 +130,10 @@ def test_invalid_refresh_token_is_rejected(api_client):
 def test_missing_refresh_token_is_rejected(api_client):
     response = api_client.post(
         "/api/auth/refresh/",
-        {},
         format="json",
     )
 
-    assert response.status_code == 400
+    assert response.status_code == 401
 
 
 @pytest.mark.django_db
@@ -154,9 +147,7 @@ def test_missing_access_token_is_rejected(api_client):
 
 @pytest.mark.django_db
 def test_invalid_access_token_is_rejected(api_client):
-    api_client.credentials(
-        HTTP_AUTHORIZATION="Bearer invalid-token"
-    )
+    api_client.cookies[settings.AUTH_COOKIE_ACCESS] = "invalid-token"
 
     response = api_client.get(
         "/api/auth/profile/"
@@ -172,11 +163,7 @@ def test_access_token_authenticates_user(
 ):
     login_response = login(api_client)
 
-    access_token = login_response.data["access"]
-
-    api_client.credentials(
-        HTTP_AUTHORIZATION=f"Bearer {access_token}"
-    )
+    assert login_response.status_code == 200
 
     response = api_client.get(
         "/api/auth/profile/"
@@ -202,29 +189,30 @@ def test_reusing_rotated_refresh_token_revokes_whole_family(
     """
     login_response = login(api_client)
 
-    token_a = login_response.data["refresh"]
+    token_a = refresh_cookie_value(login_response)
 
     rotate_response = api_client.post(
         "/api/auth/refresh/",
-        {"refresh": token_a},
         format="json",
     )
 
     assert rotate_response.status_code == 200
 
-    token_b = rotate_response.data["refresh"]
+    token_b = refresh_cookie_value(rotate_response)
+
+    api_client.cookies[settings.AUTH_COOKIE_REFRESH] = token_a
 
     replay_response = api_client.post(
         "/api/auth/refresh/",
-        {"refresh": token_a},
         format="json",
     )
 
     assert replay_response.status_code == 401
 
+    api_client.cookies[settings.AUTH_COOKIE_REFRESH] = token_b
+
     token_b_response = api_client.post(
         "/api/auth/refresh/",
-        {"refresh": token_b},
         format="json",
     )
 
@@ -233,22 +221,23 @@ def test_reusing_rotated_refresh_token_revokes_whole_family(
 
 @pytest.mark.django_db
 def test_reuse_detection_does_not_affect_other_login_sessions(
-    api_client,
     active_user,
 ):
     """
     Reuse detected on one login session (family) must not revoke an
     unrelated session created by a separate login.
     """
-    session_one = login(api_client)
-    session_two = login(api_client)
+    session_one = APIClient()
+    session_two = APIClient()
 
-    session_one_token_a = session_one.data["refresh"]
-    session_two_token = session_two.data["refresh"]
+    session_one_login = login(session_one)
+    session_two_login = login(session_two)
 
-    rotate_response = api_client.post(
+    session_one_token_a = refresh_cookie_value(session_one_login)
+    session_two_token = refresh_cookie_value(session_two_login)
+
+    rotate_response = session_one.post(
         "/api/auth/refresh/",
-        {"refresh": session_one_token_a},
         format="json",
     )
 
@@ -256,18 +245,24 @@ def test_reuse_detection_does_not_affect_other_login_sessions(
 
     # Replay session one's original token -> triggers reuse detection
     # for session one's family only.
-    replay_response = api_client.post(
+    session_one.cookies[
+        settings.AUTH_COOKIE_REFRESH
+    ] = session_one_token_a
+
+    replay_response = session_one.post(
         "/api/auth/refresh/",
-        {"refresh": session_one_token_a},
         format="json",
     )
 
     assert replay_response.status_code == 401
 
     # Session two must be completely unaffected.
-    session_two_refresh_response = api_client.post(
+    session_two.cookies[
+        settings.AUTH_COOKIE_REFRESH
+    ] = session_two_token
+
+    session_two_refresh_response = session_two.post(
         "/api/auth/refresh/",
-        {"refresh": session_two_token},
         format="json",
     )
 
@@ -285,16 +280,15 @@ def test_refresh_tokens_from_same_login_share_family_claim(
 
     login_response = login(api_client)
 
-    token_a = login_response.data["refresh"]
+    token_a = refresh_cookie_value(login_response)
     family_a = UntypedToken(token_a).payload[FAMILY_CLAIM]
 
     rotate_response = api_client.post(
         "/api/auth/refresh/",
-        {"refresh": token_a},
         format="json",
     )
 
-    token_b = rotate_response.data["refresh"]
+    token_b = refresh_cookie_value(rotate_response)
     family_b = UntypedToken(token_b).payload[FAMILY_CLAIM]
 
     assert family_a == family_b

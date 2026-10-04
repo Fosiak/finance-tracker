@@ -181,11 +181,35 @@ CSRF_TRUSTED_ORIGINS = env.list(
     default=[],
 )
 
+# SECURITY: tokens live in HttpOnly cookies, so the frontend origin needs
+# credentialed (cookie-carrying) cross-origin requests to actually work.
+CORS_ALLOW_CREDENTIALS = True
+
 AUTH_USER_MODEL = "users.User"
+
+# SECURITY: access/refresh tokens are delivered as HttpOnly cookies instead
+# of JSON response bodies, so they are never reachable from JS (no XSS
+# exfiltration via localStorage/sessionStorage).
+AUTH_COOKIE_ACCESS = "access_token"
+AUTH_COOKIE_REFRESH = "refresh_token"
+
+# Scope the refresh cookie to the auth endpoints that actually need it, so
+# it isn't attached to every single API request.
+AUTH_COOKIE_REFRESH_PATH = "/api/auth/"
+
+AUTH_COOKIE_SECURE = env.bool(
+    "DJANGO_AUTH_COOKIE_SECURE",
+    default=False,
+)
+
+AUTH_COOKIE_SAMESITE = env(
+    "DJANGO_AUTH_COOKIE_SAMESITE",
+    default="Lax",
+)
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "users.authentication.CookieJWTAuthentication",
     ),
 
     "DEFAULT_PERMISSION_CLASSES": (

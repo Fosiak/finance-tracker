@@ -34,12 +34,6 @@ def authenticate(api_client):
 
     assert response.status_code == 200
 
-    api_client.credentials(
-        HTTP_AUTHORIZATION=(
-            f"Bearer {response.data['access']}"
-        )
-    )
-
 
 @pytest.mark.django_db
 def test_user_can_change_password(api_client, user):
@@ -183,14 +177,6 @@ def test_change_password_blacklists_refresh_token(
 
     assert login_response.status_code == 200
 
-    refresh_token = login_response.data["refresh"]
-
-    api_client.credentials(
-        HTTP_AUTHORIZATION=(
-            f"Bearer {login_response.data['access']}"
-        )
-    )
-
     response = api_client.post(
         "/api/auth/change-password/",
         {
@@ -205,9 +191,6 @@ def test_change_password_blacklists_refresh_token(
 
     refresh_response = api_client.post(
         "/api/auth/refresh/",
-        {
-            "refresh": refresh_token,
-        },
         format="json",
     )
 

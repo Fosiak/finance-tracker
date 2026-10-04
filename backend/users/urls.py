@@ -13,8 +13,15 @@ from users.views.password import (
 )
 from users.views.verification import VerifyEmailView
 from users.views.logout import LogoutView
+from users.views.csrf import CsrfTokenView
 
 urlpatterns = [
+    path(
+        "csrf/",
+        CsrfTokenView.as_view(),
+        name="csrf",
+    ),
+
     path(
         "register/",
         RegisterView.as_view(),

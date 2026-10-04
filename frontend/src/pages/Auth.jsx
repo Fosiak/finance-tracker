@@ -13,10 +13,7 @@ import {
   WalletCards,
 } from "lucide-react";
 
-import {
-  login as loginRequest,
-  register as registerRequest,
-} from "../services/auth";
+import { register as registerRequest } from "../services/auth";
 import { useAuth } from "../context/AuthContext";
 
 function Auth() {
@@ -72,9 +69,7 @@ function Auth() {
 
     try {
       if (isLogin) {
-        const tokens = await loginRequest(username, password);
-
-        login(tokens);
+        await login(username, password);
 
         const destination = location.state?.from?.pathname || "/";
 

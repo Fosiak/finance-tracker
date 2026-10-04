@@ -1,5 +1,6 @@
 import pytest
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
@@ -33,8 +34,14 @@ def test_user_can_login(api_client, active_user):
     )
 
     assert response.status_code == 200
-    assert "access" in response.data
-    assert "refresh" in response.data
+
+    access_cookie = response.cookies[settings.AUTH_COOKIE_ACCESS]
+    refresh_cookie = response.cookies[settings.AUTH_COOKIE_REFRESH]
+
+    assert access_cookie.value
+    assert refresh_cookie.value
+    assert access_cookie["httponly"]
+    assert refresh_cookie["httponly"]
 
 
 @pytest.mark.django_db
@@ -49,8 +56,8 @@ def test_login_rejects_wrong_password(api_client, active_user):
     )
 
     assert response.status_code == 401
-    assert "access" not in response.data
-    assert "refresh" not in response.data
+    assert settings.AUTH_COOKIE_ACCESS not in response.cookies
+    assert settings.AUTH_COOKIE_REFRESH not in response.cookies
 
 
 @pytest.mark.django_db
@@ -65,8 +72,8 @@ def test_login_rejects_nonexistent_user(api_client):
     )
 
     assert response.status_code == 401
-    assert "access" not in response.data
-    assert "refresh" not in response.data
+    assert settings.AUTH_COOKIE_ACCESS not in response.cookies
+    assert settings.AUTH_COOKIE_REFRESH not in response.cookies
 
 
 @pytest.mark.django_db
@@ -116,8 +123,8 @@ def test_inactive_user_cannot_login(api_client):
     )
 
     assert response.status_code == 401
-    assert "access" not in response.data
-    assert "refresh" not in response.data
+    assert settings.AUTH_COOKIE_ACCESS not in response.cookies
+    assert settings.AUTH_COOKIE_REFRESH not in response.cookies
 
 
 @pytest.mark.django_db
@@ -166,11 +173,7 @@ def test_access_token_can_authenticate_request(
         format="json",
     )
 
-    access_token = login_response.data["access"]
-
-    api_client.credentials(
-        HTTP_AUTHORIZATION=f"Bearer {access_token}"
-    )
+    assert login_response.status_code == 200
 
     response = api_client.get(
         "/api/auth/profile/"
@@ -184,9 +187,7 @@ def test_access_token_can_authenticate_request(
 def test_invalid_access_token_is_rejected(
     api_client,
 ):
-    api_client.credentials(
-        HTTP_AUTHORIZATION="Bearer invalid-token"
-    )
+    api_client.cookies[settings.AUTH_COOKIE_ACCESS] = "invalid-token"
 
     response = api_client.get(
         "/api/auth/profile/"
@@ -209,16 +210,22 @@ def test_refresh_token_returns_new_access_token(
         format="json",
     )
 
-    refresh_token = login_response.data["refresh"]
+    assert login_response.status_code == 200
+
+    old_access = login_response.cookies[
+        settings.AUTH_COOKIE_ACCESS
+    ].value
 
     response = api_client.post(
         "/api/auth/refresh/",
-        {
-            "refresh": refresh_token,
-        },
         format="json",
     )
 
     assert response.status_code == 200
-    assert "access" in response.data
-    assert "refresh" in response.data
+
+    new_access = response.cookies[
+        settings.AUTH_COOKIE_ACCESS
+    ].value
+
+    assert new_access
+    assert new_access != old_access

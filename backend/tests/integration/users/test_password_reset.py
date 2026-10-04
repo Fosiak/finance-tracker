@@ -1,5 +1,6 @@
 from users.serializers.password import PasswordResetRequestSerializer
 import pytest
+from django.conf import settings
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from users.services.password_reset import (
@@ -280,8 +281,6 @@ def test_password_reset_revokes_existing_refresh_token(
 
     assert login_response.status_code == 200
 
-    refresh_token = login_response.data["refresh"]
-
     uidb64 = urlsafe_base64_encode(
         force_bytes(user.pk)
     )
@@ -303,9 +302,6 @@ def test_password_reset_revokes_existing_refresh_token(
 
     refresh_response = api_client.post(
         "/api/auth/refresh/",
-        {
-            "refresh": refresh_token,
-        },
         format="json",
     )
 
@@ -453,5 +449,5 @@ def test_user_can_login_with_new_password_after_reset(
     )
 
     assert login_response.status_code == 200
-    assert "access" in login_response.data
-    assert "refresh" in login_response.data
+    assert settings.AUTH_COOKIE_ACCESS in login_response.cookies
+    assert settings.AUTH_COOKIE_REFRESH in login_response.cookies
