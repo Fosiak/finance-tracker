@@ -321,16 +321,15 @@ LOGGING = {
     },
 
     "handlers": {
-        "security_file": {
-            "class": "logging.FileHandler",
-            "filename": BASE_DIR / "security.log",
+        "security_console": {
+            "class": "logging.StreamHandler",
             "formatter": "security",
         },
     },
 
     "loggers": {
         "security": {
-            "handlers": ["security_file"],
+            "handlers": ["security_console"],
             "level": "INFO",
             "propagate": False,
         },
