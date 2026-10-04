@@ -227,7 +227,7 @@ def test_user_can_change_email(api_client, user):
 
     assert user.email == "new@example.com"
     assert user.email_verified is False
-    assert user.is_active is False
+    assert user.is_active is True
     assert len(mail.outbox) == 1
 
 
@@ -274,7 +274,7 @@ def test_profile_email_change_normalizes_email(
 
     assert user.email == "new@example.com"
     assert user.email_verified is False
-    assert user.is_active is False
+    assert user.is_active is True
 
 
 @pytest.mark.django_db
@@ -297,7 +297,7 @@ def test_changed_email_can_be_verified(api_client, user):
 
     assert user.email == "new@example.com"
     assert user.email_verified is False
-    assert user.is_active is False
+    assert user.is_active is True
 
     assert len(mail.outbox) == 1
 

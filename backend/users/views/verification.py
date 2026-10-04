@@ -3,9 +3,10 @@ from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 
 from rest_framework import generics, status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from users.services.email import send_verification_email
 from users.services.security import log_email_verified
 
 from users.services.email_verification import (
@@ -49,7 +50,7 @@ class VerifyEmailView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if user.is_active:
+        if user.email_verified:
             verification_token.mark_used()
 
             return Response(
@@ -57,12 +58,10 @@ class VerifyEmailView(generics.GenericAPIView):
                 status=status.HTTP_200_OK,
             )
 
-        user.is_active = True
         user.email_verified = True
 
         user.save(
             update_fields=[
-                "is_active",
                 "email_verified",
             ]
         )
@@ -73,5 +72,26 @@ class VerifyEmailView(generics.GenericAPIView):
 
         return Response(
             {"detail": "Email successfully verified."},
+            status=status.HTTP_200_OK,
+        )
+
+
+class ResendVerificationEmailView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    throttle_scope = "resend_verification"
+
+    def post(self, request):
+        user = request.user
+
+        if user.email_verified:
+            return Response(
+                {"detail": "Email is already verified."},
+                status=status.HTTP_200_OK,
+            )
+
+        send_verification_email(user)
+
+        return Response(
+            {"detail": "Verification email sent."},
             status=status.HTTP_200_OK,
         )

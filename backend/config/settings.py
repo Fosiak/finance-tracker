@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "corsheaders",
     "rest_framework_simplejwt.token_blacklist",
+    "anymail",
 
     "users",
     "transactions",
@@ -194,11 +195,13 @@ EMAIL_BACKEND = env(
     "DJANGO_EMAIL_BACKEND",
     default="django.core.mail.backends.console.EmailBackend",
 )
-EMAIL_HOST = env("DJANGO_EMAIL_HOST", default="")
-EMAIL_PORT = env.int("DJANGO_EMAIL_PORT", default=587)
-EMAIL_HOST_USER = env("DJANGO_EMAIL_HOST_USER", default="")
-EMAIL_HOST_PASSWORD = env("DJANGO_EMAIL_HOST_PASSWORD", default="")
-EMAIL_USE_TLS = env.bool("DJANGO_EMAIL_USE_TLS", default=True)
+
+# Render blocks outbound traffic to SMTP ports (25/465/587) on free/starter
+# web services, so email is sent over Resend's HTTPS API (port 443, never
+# blocked) via django-anymail instead of raw SMTP.
+ANYMAIL = {
+    "RESEND_API_KEY": env("RESEND_API_KEY", default=""),
+}
 
 CORS_ALLOWED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS",
@@ -257,6 +260,7 @@ REST_FRAMEWORK = {
         "user": "1000/hour",
         "login": "5/minute",
         "register": "3/hour",
+        "resend_verification": "3/hour",
     },
 }
 

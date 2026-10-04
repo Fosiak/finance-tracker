@@ -11,7 +11,10 @@ from users.views.password import (
     PasswordResetRequestView,
     PasswordResetConfirmView,
 )
-from users.views.verification import VerifyEmailView
+from users.views.verification import (
+    VerifyEmailView,
+    ResendVerificationEmailView,
+)
 from users.views.logout import LogoutView
 from users.views.csrf import CsrfTokenView
 
@@ -56,6 +59,12 @@ urlpatterns = [
         "verify-email/<uidb64>/<token>/",
         VerifyEmailView.as_view(),
         name="verify_email",
+    ),
+
+    path(
+        "resend-verification/",
+        ResendVerificationEmailView.as_view(),
+        name="resend_verification",
     ),
 
     path(

@@ -84,9 +84,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             **validated_data,
         )
 
-        user.is_active = False
-        user.save(update_fields=["is_active"])
-
         send_verification_email(user)
 
         return user
