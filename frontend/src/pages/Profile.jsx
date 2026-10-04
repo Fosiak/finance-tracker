@@ -1,15 +1,22 @@
 import { useState } from "react";
 import { Camera, Save, User, Mail, Shield } from "lucide-react";
 
+import { useAuth } from "../context/AuthContext";
+import { updateProfile } from "../services/auth";
+
 function Profile() {
+  const { user, refreshUser } = useAuth();
+
   const [profile, setProfile] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
+    firstName: user.first_name,
+    lastName: user.last_name,
+    email: user.email,
   });
 
   const [avatar, setAvatar] = useState(null);
   const [saved, setSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -35,10 +42,27 @@ function Profile() {
     setSaved(false);
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
-    setSaved(true);
+    setError("");
+    setIsSaving(true);
+
+    try {
+      await updateProfile({
+        first_name: profile.firstName,
+        last_name: profile.lastName,
+        email: profile.email,
+      });
+
+      await refreshUser();
+
+      setSaved(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -77,8 +101,8 @@ function Profile() {
                 />
               ) : (
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white text-2xl font-semibold text-black">
-                  {profile.firstName.charAt(0)}
-                  {profile.lastName.charAt(0)}
+                  {(profile.firstName || user.username).charAt(0).toUpperCase()}
+                  {profile.lastName.charAt(0).toUpperCase()}
                 </div>
               )}
 
@@ -100,7 +124,9 @@ function Profile() {
 
             <div>
               <p className="text-sm font-medium text-white">
-                {profile.firstName} {profile.lastName}
+                {profile.firstName || profile.lastName
+                  ? `${profile.firstName} ${profile.lastName}`.trim()
+                  : user.username}
               </p>
 
               <p className="mt-1 text-xs text-zinc-500">
@@ -205,14 +231,21 @@ function Profile() {
 
               <button
                 type="submit"
-                className="flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-zinc-200"
+                disabled={isSaving}
+                className="flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Save size={16} />
-                Save changes
+                {isSaving ? "Saving..." : "Save changes"}
               </button>
             </div>
 
-            {saved && (
+            {error && (
+              <p role="alert" className="mt-4 text-right text-xs text-red-400">
+                {error}
+              </p>
+            )}
+
+            {saved && !error && (
               <p className="mt-4 text-right text-xs text-zinc-400">
                 Changes saved successfully.
               </p>

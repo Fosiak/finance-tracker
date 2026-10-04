@@ -23,8 +23,11 @@ function Auth() {
   const { login } = useAuth();
 
   const [mode, setMode] = useState("login");
+  const [registerStep, setRegisterStep] = useState(1);
 
   const [username, setUsername] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -42,8 +45,11 @@ function Auth() {
     if (newMode === mode) return;
 
     setMode(newMode);
+    setRegisterStep(1);
 
     setUsername("");
+    setFirstName("");
+    setLastName("");
     setEmail("");
     setPassword("");
     setPasswordConfirm("");
@@ -54,11 +60,21 @@ function Auth() {
     setShowPasswordConfirm(false);
   }
 
+  function goToPreviousStep() {
+    setError("");
+    setRegisterStep(1);
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
 
     setError("");
     setMessage("");
+
+    if (!isLogin && registerStep === 1) {
+      setRegisterStep(2);
+      return;
+    }
 
     if (!isLogin && password !== passwordConfirm) {
       setError("Passwords do not match.");
@@ -83,11 +99,14 @@ function Auth() {
         email,
         password,
         password_confirm: passwordConfirm,
+        first_name: firstName,
+        last_name: lastName,
       });
 
       setMessage("Account created. Check your email to verify your account.");
 
       setMode("login");
+      setRegisterStep(1);
       setPassword("");
       setPasswordConfirm("");
     } catch (error) {
@@ -259,19 +278,53 @@ function Auth() {
                   >
                     {/* Pola formularza — elastyczny, przewijalny obszar (przewija się realnie tylko na lg, gdzie karta ma stałą wysokość) */}
                     <div className="flex-1 space-y-3.5 overflow-y-auto pr-1 sm:space-y-4">
-                      <InputField
-                        id="username"
-                        label="Username"
-                        type="text"
-                        value={username}
-                        onChange={setUsername}
-                        placeholder="Enter your username"
-                        autoComplete="username"
-                        icon={User}
-                        maxLength={150}
-                      />
+                      {(isLogin || registerStep === 1) && (
+                        <InputField
+                          id="username"
+                          label="Username"
+                          type="text"
+                          value={username}
+                          onChange={setUsername}
+                          placeholder="Enter your username"
+                          autoComplete="username"
+                          icon={User}
+                          maxLength={150}
+                        />
+                      )}
 
-                      {!isLogin && (
+                      {!isLogin && registerStep === 1 && (
+                        <>
+                          <div className="field-animate">
+                            <InputField
+                              id="first-name"
+                              label="First name"
+                              type="text"
+                              value={firstName}
+                              onChange={setFirstName}
+                              placeholder="Jane"
+                              autoComplete="given-name"
+                              icon={User}
+                              maxLength={150}
+                            />
+                          </div>
+
+                          <div className="field-animate">
+                            <InputField
+                              id="last-name"
+                              label="Last name"
+                              type="text"
+                              value={lastName}
+                              onChange={setLastName}
+                              placeholder="Smith"
+                              autoComplete="family-name"
+                              icon={User}
+                              maxLength={150}
+                            />
+                          </div>
+                        </>
+                      )}
+
+                      {!isLogin && registerStep === 2 && (
                         <div className="field-animate">
                           <InputField
                             id="email"
@@ -286,24 +339,26 @@ function Auth() {
                         </div>
                       )}
 
-                      <PasswordField
-                        id="password"
-                        label="Password"
-                        value={password}
-                        onChange={setPassword}
-                        placeholder={
-                          isLogin
-                            ? "Enter your password"
-                            : "Create a strong password"
-                        }
-                        autoComplete={
-                          isLogin ? "current-password" : "new-password"
-                        }
-                        visible={showPassword}
-                        onToggle={() => setShowPassword((current) => !current)}
-                      />
+                      {(isLogin || registerStep === 2) && (
+                        <PasswordField
+                          id="password"
+                          label="Password"
+                          value={password}
+                          onChange={setPassword}
+                          placeholder={
+                            isLogin
+                              ? "Enter your password"
+                              : "Create a strong password"
+                          }
+                          autoComplete={
+                            isLogin ? "current-password" : "new-password"
+                          }
+                          visible={showPassword}
+                          onToggle={() => setShowPassword((current) => !current)}
+                        />
+                      )}
 
-                      {!isLogin && (
+                      {!isLogin && registerStep === 2 && (
                         <div className="field-animate">
                           <PasswordField
                             id="password-confirm"
@@ -349,19 +404,33 @@ function Auth() {
                     </div>
 
                     {/* Submit — zawsze przyklejony do dołu formularza */}
+                    <div className="mt-4 flex shrink-0 gap-3">
+                      {!isLogin && registerStep === 2 && (
+                        <button
+                          type="button"
+                          onClick={goToPreviousStep}
+                          disabled={isLoading}
+                          className="shrink-0 rounded-xl border border-border-default px-4 py-3 text-sm font-semibold text-slate-300 transition-all duration-200 hover:bg-white/[0.04] disabled:cursor-not-allowed disabled:opacity-50 sm:py-3.5"
+                        >
+                          Back
+                        </button>
+                      )}
+
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="group mt-4 flex w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/10 transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-xl hover:shadow-blue-500/20 focus:outline-none focus:ring-2 focus:ring-blue-500/40 active:translate-y-0 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 sm:py-3.5"
+                      className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/10 transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-xl hover:shadow-blue-500/20 focus:outline-none focus:ring-2 focus:ring-blue-500/40 active:translate-y-0 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 sm:py-3.5"
                     >
                       <span>
-                        {isLoading
-                          ? isLogin
+                        {isLogin
+                          ? isLoading
                             ? "Signing in..."
-                            : "Creating account..."
-                          : isLogin
-                            ? "Sign in"
-                            : "Create account"}
+                            : "Sign in"
+                          : registerStep === 1
+                            ? "Continue"
+                            : isLoading
+                              ? "Creating account..."
+                              : "Create account"}
                       </span>
 
                       {!isLoading && (
@@ -371,6 +440,7 @@ function Auth() {
                         />
                       )}
                     </button>
+                    </div>
                   </form>
 
                   {/* Security */}

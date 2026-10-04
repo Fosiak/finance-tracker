@@ -20,27 +20,33 @@ import LandingPage from "./pages/LandingPage";
 function App() {
   return (
     <AuthProvider>
-      <FinanceProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Public */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
+      <BrowserRouter>
+        <Routes>
+          {/* Public */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
 
-            {/* Protected */}
-            <Route element={<ProtectedRoute />}>
-              <Route element={<MainLayout />}>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/expenses" element={<Expenses />} />
-                <Route path="/statistics" element={<Statistics />} />
-                <Route path="/budget" element={<Budget />} />
-                <Route path="/profile" element={<Profile />} />
-              </Route>
+          {/* Protected — FinanceProvider only mounts once ProtectedRoute
+              has confirmed the user is authenticated, so its data fetch
+              never races the login/session-restore flow. */}
+          <Route element={<ProtectedRoute />}>
+            <Route
+              element={
+                <FinanceProvider>
+                  <MainLayout />
+                </FinanceProvider>
+              }
+            >
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/expenses" element={<Expenses />} />
+              <Route path="/statistics" element={<Statistics />} />
+              <Route path="/budget" element={<Budget />} />
+              <Route path="/profile" element={<Profile />} />
             </Route>
-          </Routes>
-        </BrowserRouter>
-      </FinanceProvider>
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </AuthProvider>
   );
 }

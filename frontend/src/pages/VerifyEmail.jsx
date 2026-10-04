@@ -59,7 +59,7 @@ function VerifyEmail() {
 
         {status === "success" && (
           <Link
-            to="/login"
+            to="/auth"
             className="mt-6 inline-block rounded-lg bg-white px-5 py-2.5 text-sm font-medium text-black transition hover:bg-gray-200"
           >
             Go to login

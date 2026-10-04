@@ -4,7 +4,21 @@ import {
   Menu,
 } from "lucide-react";
 
+import { useAuth } from "../context/AuthContext";
+
 function Navbar() {
+  const { user } = useAuth();
+
+  const displayName =
+    user.first_name || user.last_name
+      ? `${user.first_name} ${user.last_name}`.trim()
+      : user.username;
+
+  const initials = (user.first_name
+    ? `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`
+    : user.username.slice(0, 2)
+  ).toUpperCase();
+
   return (
     <header className="flex h-20 shrink-0 items-center justify-between border-b border-white/[0.06] bg-app/80 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
       {/* Mobile menu */}
@@ -42,17 +56,15 @@ function Navbar() {
           className="flex cursor-pointer items-center gap-2 rounded-xl px-2 py-1.5 transition-all duration-200 hover:bg-white/[0.04]"
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-xs font-semibold text-blue-400">
-            FT
+            {initials}
           </div>
 
           <div className="hidden text-left sm:block">
             <p className="text-sm font-medium text-slate-200">
-              User
+              {displayName}
             </p>
 
-            <p className="text-xs text-slate-600">
-              Personal account
-            </p>
+            <p className="text-xs text-slate-600">{user.email}</p>
           </div>
 
           <ChevronDown
