@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -7,8 +9,16 @@ from django.utils.http import urlsafe_base64_encode
 from .email_verification import generate_email_verification_token
 from .password_reset import generate_password_reset_token
 
+logger = logging.getLogger(__name__)
+
 
 def _send_templated_email(*, subject, template_name, context, to):
+    """
+    Best-effort send - returns True/False instead of raising. A down
+    or misconfigured email provider should never 500 the request that
+    triggered it (registration, profile update, password reset); the
+    user can always retry via the resend-verification endpoint.
+    """
     context = {
         "frontend_url": settings.FRONTEND_URL,
         **context,
@@ -28,7 +38,15 @@ def _send_templated_email(*, subject, template_name, context, to):
         to=[to],
     )
     message.attach_alternative(html_body, "text/html")
-    message.send(fail_silently=False)
+
+    try:
+        message.send(fail_silently=False)
+        return True
+    except Exception:
+        logger.exception(
+            "Failed to send '%s' email to %s", template_name, to
+        )
+        return False
 
 
 def send_verification_email(user):
@@ -45,7 +63,7 @@ def send_verification_email(user):
         f"&token={token}"
     )
 
-    _send_templated_email(
+    return _send_templated_email(
         subject="Confirm your Finance Tracker account",
         template_name="verify_email",
         context={"verification_url": verification_url},
@@ -67,7 +85,7 @@ def send_password_reset_email(user):
         f"&token={token}"
     )
 
-    _send_templated_email(
+    return _send_templated_email(
         subject="Reset your Finance Tracker password",
         template_name="password_reset",
         context={"reset_url": reset_url},

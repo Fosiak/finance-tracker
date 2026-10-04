@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from django.core import mail
 from django.contrib.auth import get_user_model
@@ -249,6 +251,27 @@ def test_registration_normalizes_email(api_client):
     user = User.objects.get(username="testuser")
 
     assert user.email == "test@example.com"
+
+
+@pytest.mark.django_db
+def test_registration_succeeds_even_if_email_sending_fails(api_client):
+    with patch(
+        "django.core.mail.EmailMultiAlternatives.send",
+        side_effect=Exception("provider down"),
+    ):
+        response = api_client.post(
+            "/api/auth/register/",
+            {
+                "username": "testuser",
+                "email": "test@example.com",
+                "password": "StrongPassword123!",
+                "password_confirm": "StrongPassword123!",
+            },
+            format="json",
+        )
+
+    assert response.status_code == 201
+    assert User.objects.filter(username="testuser").exists()
 
 
 @pytest.mark.django_db
