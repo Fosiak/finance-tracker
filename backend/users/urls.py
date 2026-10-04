@@ -1,19 +1,27 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
 
-from .views import (
+from users.views.auth import (
     RegisterView,
     SecureLoginView,
-    ProfileView,
-    VerifyEmailView,
+    SecureTokenRefreshView,
+)
+from users.views.profile import ProfileView
+from users.views.password import (
     ChangePasswordView,
     PasswordResetRequestView,
     PasswordResetConfirmView,
-    LogoutView,
 )
-
+from users.views.verification import VerifyEmailView
+from users.views.logout import LogoutView
+from users.views.csrf import CsrfTokenView
 
 urlpatterns = [
+    path(
+        "csrf/",
+        CsrfTokenView.as_view(),
+        name="csrf",
+    ),
+
     path(
         "register/",
         RegisterView.as_view(),
@@ -28,7 +36,7 @@ urlpatterns = [
 
     path(
         "refresh/",
-        TokenRefreshView.as_view(),
+        SecureTokenRefreshView.as_view(),
         name="token_refresh",
     ),
 

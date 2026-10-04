@@ -1,35 +1,47 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-/* Layouts Import */
+
+import { AuthProvider } from "./context/AuthContext";
+import { FinanceProvider } from "./context/FinanceContext";
+
+import AuthLayout from "./layouts/AuthLayout";
 import MainLayout from "./layouts/MainLayout";
-/* Pages Import */
+
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+
+import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Expenses from "./pages/Expenses";
-import Budget from "./pages/Budget";
 import Statistics from "./pages/Statistics";
+import Budget from "./pages/Budget";
 import Profile from "./pages/Profile";
 import VerifyEmail from "./pages/VerifyEmail";
-/* Context Import */
-import { FinanceProvider } from "./context/FinanceContext";
+import LandingPage from "./pages/LandingPage";
 
 function App() {
   return (
-    <FinanceProvider>
-      <BrowserRouter>
-        <MainLayout>
+    <AuthProvider>
+      <FinanceProvider>
+        <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-
-            <Route path="/expenses" element={<Expenses />} />
-
-            <Route path="/statistics" element={<Statistics />} />
-
-            <Route path="/budget" element={<Budget />} />
-            <Route path="/profile" element={<Profile />} />
+            {/* Public */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
+
+            {/* Protected */}
+            <Route element={<ProtectedRoute />}>
+              <Route element={<MainLayout />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/expenses" element={<Expenses />} />
+                <Route path="/statistics" element={<Statistics />} />
+                <Route path="/budget" element={<Budget />} />
+                <Route path="/profile" element={<Profile />} />
+              </Route>
+            </Route>
           </Routes>
-        </MainLayout>
-      </BrowserRouter>
-    </FinanceProvider>
+        </BrowserRouter>
+      </FinanceProvider>
+    </AuthProvider>
   );
 }
 

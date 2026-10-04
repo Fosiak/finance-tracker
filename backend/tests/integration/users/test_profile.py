@@ -48,10 +48,6 @@ def authenticate(api_client, username, password):
 
     assert response.status_code == 200
 
-    api_client.credentials(
-        HTTP_AUTHORIZATION=f"Bearer {response.data['access']}"
-    )
-
 
 @pytest.mark.django_db
 def test_authenticated_user_can_view_own_profile(

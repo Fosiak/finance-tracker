@@ -1,18 +1,24 @@
+import { Outlet } from "react-router-dom";
+
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import Footer from "../components/Footer";
 
-function MainLayout({ children }) {
+function MainLayout() {
   return (
-    <div className="flex min-h-screen bg-[#0f0f0f] text-white">
-      <Sidebar />
+    <div className="min-h-screen bg-app text-white">
+      <div className="flex min-h-screen">
+        <Sidebar />
 
-      <div className="flex min-h-screen flex-1 flex-col">
-        <Navbar />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Navbar />
 
-        <main className="flex-1">{children}</main>
+          <main className="min-w-0 flex-1">
+            <Outlet />
+          </main>
 
-        <Footer />
+          <Footer />
+        </div>
       </div>
     </div>
   );
