@@ -30,6 +30,15 @@ urlpatterns = [
         ),
         name="swagger-ui",
     ),
+    path(
+        "api/transactions/",
+        include("transactions.urls"),
+    ),
+
+    path(
+        "api/budgets/",
+        include("budgets.urls"),
+    ),
 ]
 
 if settings.DEBUG:
