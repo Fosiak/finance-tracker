@@ -10,10 +10,14 @@ import { getBudgets, setBudgetForMonth } from "../services/budgets";
 
 const FinanceContext = createContext(null);
 
+function currentMonth() {
+  return new Date().toISOString().slice(0, 7);
+}
+
 function FinanceProvider({ children }) {
   const [expenses, setExpenses] = useState([]);
   const [budgets, setBudgets] = useState({});
-  const [selectedMonth, setSelectedMonth] = useState("2026-09");
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
