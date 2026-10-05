@@ -1,9 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Lock, Save, User, Mail, Shield } from "lucide-react";
+import { Camera, Lock, Save, Trash2, User, Mail, Shield } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
-import { updateProfile, uploadAvatar, changePassword } from "../services/auth";
+import {
+  updateProfile,
+  uploadAvatar,
+  deleteAvatar,
+  changePassword,
+} from "../services/auth";
 
 function Profile() {
   const { user, refreshUser, logout } = useAuth();
@@ -69,6 +74,20 @@ function Profile() {
       setIsUploadingAvatar(false);
       setAvatarPreview(null);
       URL.revokeObjectURL(previewUrl);
+    }
+  }
+
+  async function handleAvatarReset() {
+    setAvatarError("");
+    setIsUploadingAvatar(true);
+
+    try {
+      await deleteAvatar();
+      await refreshUser();
+    } catch (err) {
+      setAvatarError(err.message);
+    } finally {
+      setIsUploadingAvatar(false);
     }
   }
 
@@ -215,6 +234,18 @@ function Profile() {
                 <p role="alert" className="mt-1 text-xs text-red-400">
                   {avatarError}
                 </p>
+              )}
+
+              {isVerified && user.avatar && (
+                <button
+                  type="button"
+                  onClick={handleAvatarReset}
+                  disabled={isUploadingAvatar}
+                  className="mt-2 flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Trash2 size={13} />
+                  Reset to default
+                </button>
               )}
             </div>
           </div>
