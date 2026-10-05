@@ -10,6 +10,10 @@ import {
   deleteAvatar,
   changePassword,
 } from "../services/auth";
+import Card from "../components/ui/Card";
+import Input from "../components/ui/Input";
+import Button from "../components/ui/Button";
+import { focusRing } from "../components/ui/styles";
 
 function Profile() {
   const { user, refreshUser, logout } = useAuth();
@@ -144,27 +148,27 @@ function Profile() {
   }
 
   return (
-    <div className="px-8 py-8">
+    <div className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-white">
           Profile
         </h1>
 
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1 text-sm text-text-muted">
           Manage your personal information and account.
         </p>
       </div>
 
       <div className="mt-8 max-w-3xl">
         {/* Avatar */}
-        <section className="rounded-xl border border-[#292929] bg-[#181818] p-6">
+        <Card>
           <div>
             <h2 className="text-base font-semibold text-white">
               Profile picture
             </h2>
 
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-text-muted">
               Choose a profile picture for your account.
             </p>
           </div>
@@ -174,7 +178,7 @@ function Profile() {
               {avatarSrc ? (
                 <img
                   src={avatarSrc}
-                  alt="Profile"
+                  alt=""
                   className="h-20 w-20 rounded-full object-cover"
                 />
               ) : (
@@ -187,7 +191,8 @@ function Profile() {
               {isVerified ? (
                 <label
                   htmlFor="avatar"
-                  className="absolute -bottom-1 -right-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[#292929] bg-[#222222] text-zinc-300 transition hover:bg-[#2a2a2a] hover:text-white"
+                  aria-label="Change profile picture"
+                  className={`absolute -bottom-1 -right-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-border-default bg-surface text-text-muted transition hover:bg-white/[0.06] hover:text-white ${focusRing}`}
                 >
                   <Camera size={15} />
 
@@ -202,8 +207,9 @@ function Profile() {
                 </label>
               ) : (
                 <div
-                  title="Verify your email to change your avatar"
-                  className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border border-[#292929] bg-[#222222] text-zinc-600"
+                  role="img"
+                  aria-label="Verify your email to change your avatar"
+                  className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border border-border-default bg-surface text-text-faint"
                 >
                   <Lock size={14} />
                 </div>
@@ -217,7 +223,7 @@ function Profile() {
                   : user.username}
               </p>
 
-              <p className="mt-1 text-xs text-zinc-500">
+              <p className="mt-1 text-xs text-text-muted">
                 {isVerified
                   ? isUploadingAvatar
                     ? "Uploading..."
@@ -232,7 +238,7 @@ function Profile() {
                   type="button"
                   onClick={handleAvatarReset}
                   disabled={isAvatarBusy}
-                  className="mt-2 flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`mt-2 flex items-center gap-1.5 rounded text-xs font-medium text-text-muted transition hover:text-danger disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`}
                 >
                   <Trash2 size={13} />
                   {isRemovingAvatar ? "Removing..." : "Reset to default"}
@@ -240,13 +246,13 @@ function Profile() {
               )}
             </div>
           </div>
-        </section>
+        </Card>
 
         {/* Personal information */}
-        <section className="mt-6 rounded-xl border border-[#292929] bg-[#181818] p-6">
+        <Card className="mt-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#222222]">
-              <User size={18} className="text-zinc-300" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-control bg-white/[0.04]">
+              <User size={18} className="text-slate-300" />
             </div>
 
             <div>
@@ -254,7 +260,7 @@ function Profile() {
                 Personal information
               </h2>
 
-              <p className="mt-1 text-sm text-zinc-500">
+              <p className="mt-1 text-sm text-text-muted">
                 Update your personal details.
               </p>
             </div>
@@ -262,112 +268,73 @@ function Profile() {
 
           <form onSubmit={handleSubmit} className="mt-6">
             <div className="grid gap-5 md:grid-cols-2">
-              {/* First name */}
-              <div>
-                <label
-                  htmlFor="firstName"
-                  className="mb-2 block text-sm font-medium text-zinc-300"
-                >
-                  First name
-                </label>
+              <Input
+                label="First name"
+                id="firstName"
+                name="firstName"
+                type="text"
+                value={profile.firstName}
+                onChange={handleChange}
+                required
+              />
 
-                <input
-                  id="firstName"
-                  name="firstName"
-                  type="text"
-                  value={profile.firstName}
-                  onChange={handleChange}
-                  required
-                  className="w-full rounded-lg border border-[#292929] bg-[#111111] px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500"
-                />
-              </div>
+              <Input
+                label="Last name"
+                id="lastName"
+                name="lastName"
+                type="text"
+                value={profile.lastName}
+                onChange={handleChange}
+                required
+              />
 
-              {/* Last name */}
-              <div>
-                <label
-                  htmlFor="lastName"
-                  className="mb-2 block text-sm font-medium text-zinc-300"
-                >
-                  Last name
-                </label>
-
-                <input
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  value={profile.lastName}
-                  onChange={handleChange}
-                  required
-                  className="w-full rounded-lg border border-[#292929] bg-[#111111] px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500"
-                />
-              </div>
-
-              {/* Email */}
-              <div className="md:col-span-2">
-                <label
-                  htmlFor="email"
-                  className="mb-2 block text-sm font-medium text-zinc-300"
-                >
-                  Email address
-                </label>
-
-                <div className="relative">
-                  <Mail
-                    size={17}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600"
-                  />
-
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={profile.email}
-                    onChange={handleChange}
-                    required
-                    className="w-full rounded-lg border border-[#292929] bg-[#111111] py-3 pl-10 pr-4 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500"
-                  />
-                </div>
-              </div>
+              <Input
+                label="Email address"
+                id="email"
+                name="email"
+                type="email"
+                icon={Mail}
+                value={profile.email}
+                onChange={handleChange}
+                required
+                wrapperClassName="md:col-span-2"
+              />
             </div>
 
-            <div className="mt-6 flex items-center justify-between border-t border-[#292929] pt-5">
-              <p className="text-xs text-zinc-600">
+            <div className="mt-6 flex items-center justify-between border-t border-border-default pt-5">
+              <p className="text-xs text-text-faint">
                 Your information will be securely stored.
               </p>
 
-              <button
-                type="submit"
-                disabled={isSaving}
-                className="flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-50"
-              >
+              <Button type="submit" disabled={isSaving}>
                 <Save size={16} />
                 {isSaving ? "Saving..." : "Save changes"}
-              </button>
+              </Button>
             </div>
           </form>
-        </section>
+        </Card>
 
         {/* Security */}
-        <section className="mt-6 rounded-xl border border-[#292929] bg-[#181818] p-6">
+        <Card className="mt-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#222222]">
-              <Shield size={18} className="text-zinc-300" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-control bg-white/[0.04]">
+              <Shield size={18} className="text-slate-300" />
             </div>
 
             <div>
               <h2 className="text-base font-semibold text-white">Security</h2>
 
-              <p className="mt-1 text-sm text-zinc-500">
+              <p className="mt-1 text-sm text-text-muted">
                 Manage your account security.
               </p>
             </div>
           </div>
 
-          <div className="mt-6 flex items-center justify-between border-t border-[#292929] pt-5">
+          <div className="mt-6 flex items-center justify-between border-t border-border-default pt-5">
             <div>
               <p className="text-sm font-medium text-white">Password</p>
 
-              <p className="mt-1 text-xs text-zinc-600">
+              <p className="mt-1 text-xs text-text-muted">
                 {isVerified
                   ? "Change your account password."
                   : "Verify your email to change your password."}
@@ -375,19 +342,19 @@ function Profile() {
             </div>
 
             {isVerified && (
-              <button
-                type="button"
+              <Button
+                variant="secondary"
                 onClick={() => setIsChangingPassword((current) => !current)}
-                className="rounded-lg border border-[#292929] bg-[#111111] px-4 py-2.5 text-sm font-medium text-zinc-300 transition hover:bg-[#222222] hover:text-white"
               >
                 {isChangingPassword ? "Cancel" : "Change password"}
-              </button>
+              </Button>
             )}
 
             {!isVerified && (
               <div
-                title="Verify your email to change your password"
-                className="flex items-center gap-2 rounded-lg border border-[#292929] bg-[#111111] px-4 py-2.5 text-sm font-medium text-zinc-600"
+                role="img"
+                aria-label="Verify your email to change your password"
+                className="flex items-center gap-2 rounded-control border border-border-default bg-surface-inset px-4 py-2.5 text-sm font-medium text-text-faint"
               >
                 <Lock size={14} />
                 Change password
@@ -398,86 +365,55 @@ function Profile() {
           {isVerified && isChangingPassword && (
             <form
               onSubmit={handlePasswordSubmit}
-              className="mt-5 space-y-4 border-t border-[#292929] pt-5"
+              className="mt-5 space-y-4 border-t border-border-default pt-5"
             >
-              <div>
-                <label
-                  htmlFor="currentPassword"
-                  className="mb-2 block text-sm font-medium text-zinc-300"
-                >
-                  Current password
-                </label>
+              <Input
+                label="Current password"
+                id="currentPassword"
+                name="currentPassword"
+                type="password"
+                value={passwordForm.currentPassword}
+                onChange={handlePasswordFieldChange}
+                required
+                autoComplete="current-password"
+              />
 
-                <input
-                  id="currentPassword"
-                  name="currentPassword"
+              <div className="grid gap-4 md:grid-cols-2">
+                <Input
+                  label="New password"
+                  id="newPassword"
+                  name="newPassword"
                   type="password"
-                  value={passwordForm.currentPassword}
+                  value={passwordForm.newPassword}
                   onChange={handlePasswordFieldChange}
                   required
-                  autoComplete="current-password"
-                  className="w-full rounded-lg border border-[#292929] bg-[#111111] px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500"
+                  autoComplete="new-password"
+                />
+
+                <Input
+                  label="Confirm new password"
+                  id="newPasswordConfirm"
+                  name="newPasswordConfirm"
+                  type="password"
+                  value={passwordForm.newPasswordConfirm}
+                  onChange={handlePasswordFieldChange}
+                  required
+                  autoComplete="new-password"
                 />
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <label
-                    htmlFor="newPassword"
-                    className="mb-2 block text-sm font-medium text-zinc-300"
-                  >
-                    New password
-                  </label>
-
-                  <input
-                    id="newPassword"
-                    name="newPassword"
-                    type="password"
-                    value={passwordForm.newPassword}
-                    onChange={handlePasswordFieldChange}
-                    required
-                    autoComplete="new-password"
-                    className="w-full rounded-lg border border-[#292929] bg-[#111111] px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="newPasswordConfirm"
-                    className="mb-2 block text-sm font-medium text-zinc-300"
-                  >
-                    Confirm new password
-                  </label>
-
-                  <input
-                    id="newPasswordConfirm"
-                    name="newPasswordConfirm"
-                    type="password"
-                    value={passwordForm.newPasswordConfirm}
-                    onChange={handlePasswordFieldChange}
-                    required
-                    autoComplete="new-password"
-                    className="w-full rounded-lg border border-[#292929] bg-[#111111] px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500"
-                  />
-                </div>
-              </div>
-
               <div className="flex items-center justify-between pt-1">
-                <p className="text-xs text-zinc-600">
+                <p className="text-xs text-text-faint">
                   You'll be signed out and asked to log in again.
                 </p>
 
-                <button
-                  type="submit"
-                  disabled={isSavingPassword}
-                  className="rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-50"
-                >
+                <Button type="submit" disabled={isSavingPassword}>
                   {isSavingPassword ? "Saving..." : "Save new password"}
-                </button>
+                </Button>
               </div>
             </form>
           )}
-        </section>
+        </Card>
       </div>
     </div>
   );
