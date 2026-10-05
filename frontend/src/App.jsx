@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { AuthProvider } from "./context/AuthContext";
 import { FinanceProvider } from "./context/FinanceContext";
+import { ToastProvider } from "./context/ToastContext";
 
 import AuthLayout from "./layouts/AuthLayout";
 import MainLayout from "./layouts/MainLayout";
@@ -22,6 +23,7 @@ import CookiePolicy from "./pages/CookiePolicy";
 
 function App() {
   return (
+    <ToastProvider>
     <AuthProvider>
       <BrowserRouter>
         <Routes>
@@ -58,6 +60,7 @@ function App() {
         <CookieNotice />
       </BrowserRouter>
     </AuthProvider>
+    </ToastProvider>
   );
 }
 

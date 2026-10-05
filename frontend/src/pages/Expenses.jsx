@@ -12,19 +12,17 @@ function Expenses() {
   const [search, setSearch] = useState("");
 
   const [deletingId, setDeletingId] = useState(null);
-  const [deleteError, setDeleteError] = useState("");
 
   const { selectedMonthExpenses, addExpense, deleteExpense, updateExpense } =
     useFinance();
 
   async function handleDeleteExpense(id) {
-    setDeleteError("");
     setDeletingId(id);
 
     try {
       await deleteExpense(id);
-    } catch (error) {
-      setDeleteError(error.message);
+    } catch {
+      // FinanceContext already surfaced this via a toast.
     } finally {
       setDeletingId(null);
     }
@@ -72,16 +70,6 @@ function Expenses() {
           Add expense
         </button>
       </div>
-
-      {/* Delete error */}
-      {deleteError && (
-        <div
-          role="alert"
-          className="mt-6 rounded-lg border border-red-500/20 bg-red-500/[0.07] px-4 py-3"
-        >
-          <p className="text-sm text-red-400">{deleteError}</p>
-        </div>
-      )}
 
       {/* Search */}
       <div className="mt-8">

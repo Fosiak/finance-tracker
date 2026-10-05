@@ -7,6 +7,7 @@ import {
   deleteTransaction as deleteTransactionRequest,
 } from "../services/transactions";
 import { getBudgets, setBudgetForMonth } from "../services/budgets";
+import { useToast } from "./ToastContext";
 
 const FinanceContext = createContext(null);
 
@@ -15,6 +16,8 @@ function currentMonth() {
 }
 
 function FinanceProvider({ children }) {
+  const { showSuccess, showError } = useToast();
+
   const [expenses, setExpenses] = useState([]);
   const [budgets, setBudgets] = useState({});
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
@@ -44,7 +47,10 @@ function FinanceProvider({ children }) {
           ),
         );
       } catch (err) {
-        if (!isCancelled) setError(err.message);
+        if (!isCancelled) {
+          setError(err.message);
+          showError(`Couldn't load your data: ${err.message}`);
+        }
       } finally {
         if (!isCancelled) setIsLoading(false);
       }
@@ -55,30 +61,56 @@ function FinanceProvider({ children }) {
     return () => {
       isCancelled = true;
     };
-  }, []);
+  }, [showError]);
 
   async function addExpense(expense) {
     const { id: _ignoredClientId, ...payload } = expense;
-    const created = await createTransaction(payload);
-    setExpenses((current) => [created, ...current]);
+
+    try {
+      const created = await createTransaction(payload);
+      setExpenses((current) => [created, ...current]);
+      showSuccess("Expense added.");
+    } catch (err) {
+      showError(err.message);
+      throw err;
+    }
   }
 
   async function deleteExpense(id) {
-    await deleteTransactionRequest(id);
-    setExpenses((current) => current.filter((expense) => expense.id !== id));
+    try {
+      await deleteTransactionRequest(id);
+      setExpenses((current) => current.filter((expense) => expense.id !== id));
+      showSuccess("Expense deleted.");
+    } catch (err) {
+      showError(err.message);
+      throw err;
+    }
   }
 
   async function updateExpense(updatedExpense) {
     const { id, ...payload } = updatedExpense;
-    const saved = await updateTransactionRequest(id, payload);
-    setExpenses((current) =>
-      current.map((expense) => (expense.id === id ? saved : expense)),
-    );
+
+    try {
+      const saved = await updateTransactionRequest(id, payload);
+      setExpenses((current) =>
+        current.map((expense) => (expense.id === id ? saved : expense)),
+      );
+      showSuccess("Expense updated.");
+    } catch (err) {
+      showError(err.message);
+      throw err;
+    }
   }
 
   async function setBudget(month, amount) {
-    const saved = await setBudgetForMonth(month, amount);
-    setBudgets((current) => ({ ...current, [month]: saved.limit }));
+    try {
+      const saved = await setBudgetForMonth(month, amount);
+      setBudgets((current) => ({ ...current, [month]: saved.limit }));
+      showSuccess("Budget updated.");
+    } catch (err) {
+      showError(err.message);
+      throw err;
+    }
   }
 
   function getBudgetForMonth(month) {

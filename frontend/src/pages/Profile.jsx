@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Camera, Lock, Save, Trash2, User, Mail, Shield } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import {
   updateProfile,
   uploadAvatar,
@@ -12,6 +13,7 @@ import {
 
 function Profile() {
   const { user, refreshUser, logout } = useAuth();
+  const { showSuccess, showError } = useToast();
   const navigate = useNavigate();
   const isVerified = user.email_verified;
 
@@ -21,13 +23,12 @@ function Profile() {
     email: user.email,
   });
 
-  const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState("");
 
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const [avatarError, setAvatarError] = useState("");
+  const [isRemovingAvatar, setIsRemovingAvatar] = useState(false);
+  const isAvatarBusy = isUploadingAvatar || isRemovingAvatar;
 
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
@@ -36,7 +37,6 @@ function Profile() {
     newPasswordConfirm: "",
   });
   const [isSavingPassword, setIsSavingPassword] = useState(false);
-  const [passwordError, setPasswordError] = useState("");
 
   const avatarSrc = avatarPreview || user.avatar || null;
 
@@ -47,8 +47,6 @@ function Profile() {
       ...currentProfile,
       [name]: value,
     }));
-
-    setSaved(false);
   }
 
   async function handleAvatarChange(event) {
@@ -59,8 +57,6 @@ function Profile() {
       return;
     }
 
-    setAvatarError("");
-
     const previewUrl = URL.createObjectURL(file);
     setAvatarPreview(previewUrl);
     setIsUploadingAvatar(true);
@@ -68,8 +64,9 @@ function Profile() {
     try {
       await uploadAvatar(file);
       await refreshUser();
+      showSuccess("Avatar updated.");
     } catch (err) {
-      setAvatarError(err.message);
+      showError(err.message);
     } finally {
       setIsUploadingAvatar(false);
       setAvatarPreview(null);
@@ -78,23 +75,22 @@ function Profile() {
   }
 
   async function handleAvatarReset() {
-    setAvatarError("");
-    setIsUploadingAvatar(true);
+    setIsRemovingAvatar(true);
 
     try {
       await deleteAvatar();
       await refreshUser();
+      showSuccess("Avatar reset to default.");
     } catch (err) {
-      setAvatarError(err.message);
+      showError(err.message);
     } finally {
-      setIsUploadingAvatar(false);
+      setIsRemovingAvatar(false);
     }
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
 
-    setError("");
     setIsSaving(true);
 
     try {
@@ -106,9 +102,9 @@ function Profile() {
 
       await refreshUser();
 
-      setSaved(true);
+      showSuccess("Profile updated.");
     } catch (err) {
-      setError(err.message);
+      showError(err.message);
     } finally {
       setIsSaving(false);
     }
@@ -123,7 +119,6 @@ function Profile() {
   async function handlePasswordSubmit(event) {
     event.preventDefault();
 
-    setPasswordError("");
     setIsSavingPassword(true);
 
     try {
@@ -143,7 +138,7 @@ function Profile() {
         },
       });
     } catch (err) {
-      setPasswordError(err.message);
+      showError(err.message);
       setIsSavingPassword(false);
     }
   }
@@ -201,7 +196,7 @@ function Profile() {
                     type="file"
                     accept="image/*"
                     onChange={handleAvatarChange}
-                    disabled={isUploadingAvatar}
+                    disabled={isAvatarBusy}
                     className="hidden"
                   />
                 </label>
@@ -226,25 +221,21 @@ function Profile() {
                 {isVerified
                   ? isUploadingAvatar
                     ? "Uploading..."
-                    : "JPG, PNG or WebP. Maximum 5 MB."
+                    : isRemovingAvatar
+                      ? "Removing..."
+                      : "JPG, PNG or WebP. Maximum 5 MB."
                   : "Verify your email to change your avatar."}
               </p>
-
-              {avatarError && (
-                <p role="alert" className="mt-1 text-xs text-red-400">
-                  {avatarError}
-                </p>
-              )}
 
               {isVerified && user.avatar && (
                 <button
                   type="button"
                   onClick={handleAvatarReset}
-                  disabled={isUploadingAvatar}
+                  disabled={isAvatarBusy}
                   className="mt-2 flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Trash2 size={13} />
-                  Reset to default
+                  {isRemovingAvatar ? "Removing..." : "Reset to default"}
                 </button>
               )}
             </div>
@@ -353,18 +344,6 @@ function Profile() {
                 {isSaving ? "Saving..." : "Save changes"}
               </button>
             </div>
-
-            {error && (
-              <p role="alert" className="mt-4 text-right text-xs text-red-400">
-                {error}
-              </p>
-            )}
-
-            {saved && !error && (
-              <p className="mt-4 text-right text-xs text-zinc-400">
-                Changes saved successfully.
-              </p>
-            )}
           </form>
         </section>
 
@@ -496,12 +475,6 @@ function Profile() {
                   {isSavingPassword ? "Saving..." : "Save new password"}
                 </button>
               </div>
-
-              {passwordError && (
-                <p role="alert" className="text-right text-xs text-red-400">
-                  {passwordError}
-                </p>
-              )}
             </form>
           )}
         </section>

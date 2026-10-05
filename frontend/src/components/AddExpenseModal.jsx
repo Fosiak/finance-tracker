@@ -8,7 +8,6 @@ function AddExpenseModal({ isOpen, onClose, onAddExpense, editingExpense }) {
   const [date, setDate] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formError, setFormError] = useState("");
 
   useEffect(() => {
     if (editingExpense) {
@@ -22,8 +21,6 @@ function AddExpenseModal({ isOpen, onClose, onAddExpense, editingExpense }) {
       setDescription("");
       setDate("");
     }
-
-    setFormError("");
   }, [editingExpense, isOpen]);
 
   if (!isOpen) {
@@ -43,7 +40,6 @@ function AddExpenseModal({ isOpen, onClose, onAddExpense, editingExpense }) {
       date,
     };
 
-    setFormError("");
     setIsSubmitting(true);
 
     try {
@@ -55,8 +51,9 @@ function AddExpenseModal({ isOpen, onClose, onAddExpense, editingExpense }) {
       setDate("");
 
       onClose();
-    } catch (error) {
-      setFormError(error.message);
+    } catch {
+      // FinanceContext already surfaced this via a toast - keep the
+      // modal open with the user's input so they can retry.
     } finally {
       setIsSubmitting(false);
     }
@@ -165,16 +162,6 @@ function AddExpenseModal({ isOpen, onClose, onAddExpense, editingExpense }) {
               className="w-full rounded-lg border border-[#292929] bg-[#111111] px-4 py-3 text-sm text-white outline-none focus:border-zinc-500"
             />
           </div>
-
-          {/* Error */}
-          {formError && (
-            <div
-              role="alert"
-              className="rounded-lg border border-red-500/20 bg-red-500/[0.07] px-4 py-3"
-            >
-              <p className="text-sm text-red-400">{formError}</p>
-            </div>
-          )}
 
           {/* Buttons */}
           <div className="flex justify-end gap-3 border-t border-[#292929] pt-5">
