@@ -52,6 +52,12 @@ export async function uploadAvatar(file) {
   });
 }
 
+export async function deleteAvatar() {
+  return apiRequest("/api/auth/profile/avatar/", {
+    method: "DELETE",
+  });
+}
+
 export async function changePassword(data) {
   return apiRequest("/api/auth/change-password/", {
     method: "POST",
