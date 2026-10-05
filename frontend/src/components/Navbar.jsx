@@ -105,7 +105,7 @@ function Navbar() {
 
             <ChevronDown
               size={16}
-              className={`hidden text-slate-600 transition-transform duration-200 sm:block ${
+              className={`shrink-0 text-slate-600 transition-transform duration-200 ${
                 isMenuOpen ? "rotate-180" : ""
               }`}
             />
@@ -114,7 +114,7 @@ function Navbar() {
           {isMenuOpen && (
             <div
               role="menu"
-              className="absolute right-0 top-full z-20 mt-2 w-56 overflow-hidden rounded-xl border border-border-default bg-surface shadow-card"
+              className="absolute right-0 top-full z-20 mt-2 w-56 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border-default bg-surface shadow-card"
             >
               <div className="border-b border-border-default px-4 py-3 sm:hidden">
                 <p className="text-sm font-medium text-slate-200">
