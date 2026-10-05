@@ -9,6 +9,7 @@
   --color-app: #09090b;
   --color-surface: #111113;
   --color-surface-secondary: #0f172a;
+  --color-surface-inset: #0b0b0e;
 
   --color-border-subtle: rgb(255 255 255 / 0.06);
   --color-border-default: rgb(255 255 255 / 0.08);
@@ -19,6 +20,32 @@
 
   --color-accent-indigo: #6366f1;
   --color-accent-violet: #8b5cf6;
+
+  /* Text — AA-checked against --color-app/--color-surface. Use -muted for
+     real content (labels, helper text, descriptions); reserve -faint for
+     genuinely decorative text (copyright lines, meta captions). */
+  --color-text-muted: #94a3b8;
+  --color-text-faint: #64748b;
+
+  /* Semantic status */
+  --color-danger: #f87171;
+  --color-danger-strong: #ef4444;
+  --color-success: #34d399;
+  --color-success-strong: #10b981;
+  --color-warning: #fbbf24;
+  --color-warning-strong: #f59e0b;
+
+  /* Expense categories — distinguishable at small swatch/pill/bar sizes,
+     kept clear of the semantic colors above (danger=red, success=emerald,
+     warning=amber, primary=blue). */
+  --color-cat-housing: #38bdf8;
+  --color-cat-food: #fb923c;
+  --color-cat-transport: var(--color-accent-indigo);
+  --color-cat-entertainment: var(--color-accent-violet);
+  --color-cat-shopping: #f472b6;
+  --color-cat-health: #2dd4bf;
+  --color-cat-subscriptions: #22d3ee;
+  --color-cat-other: var(--color-text-muted);
 
   /* ─────────────────────────────
      Finance Tracker — Shadows
@@ -45,3 +72,36 @@
   --ease-finance: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Blanket fallback for every transition/animation that has no dedicated
+   reduced-motion handling of its own. Components with a *different*
+   reduced-motion behavior (e.g. LandingPage's number counter skipping its
+   rAF loop) keep their own JS/motion-reduce: handling on top of this. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Skip-to-content link: visually hidden until keyboard-focused. */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -3rem;
+  z-index: 100;
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  color: white;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: top 0.15s var(--ease-finance);
+}
+
+.skip-link:focus-visible {
+  top: 1rem;
+}

@@ -25,27 +25,27 @@ function SpendingChart() {
         <AreaChart data={data}>
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="#292929"
+            stroke="rgba(255,255,255,0.08)"
           />
 
           <XAxis
             dataKey="day"
-            stroke="#71717a"
+            stroke="#94a3b8"
             tickLine={false}
             axisLine={false}
           />
 
           <YAxis
-            stroke="#71717a"
+            stroke="#94a3b8"
             tickLine={false}
             axisLine={false}
           />
 
           <Tooltip
             contentStyle={{
-              backgroundColor: "#181818",
-              border: "1px solid #292929",
-              borderRadius: "8px",
+              backgroundColor: "#111113",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: "10px",
               color: "#f5f5f5",
             }}
           />
@@ -53,9 +53,9 @@ function SpendingChart() {
           <Area
             type="monotone"
             dataKey="amount"
-            stroke="#ffffff"
-            fill="#ffffff"
-            fillOpacity={0.08}
+            stroke="#2563eb"
+            fill="#2563eb"
+            fillOpacity={0.12}
             strokeWidth={2}
           />
         </AreaChart>

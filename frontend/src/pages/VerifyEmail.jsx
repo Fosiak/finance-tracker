@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
+import Button from "../components/ui/Button";
+import { focusRing } from "../components/ui/styles";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -58,31 +60,28 @@ function VerifyEmail() {
   }, [searchParams]);
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-2xl border border-[#292929] bg-[#151515] p-8 text-center">
+    <div className="flex min-h-screen items-center justify-center bg-app px-4">
+      <div className="w-full max-w-md rounded-card border border-border-default bg-surface p-8 text-center shadow-card">
         <h1 className="text-2xl font-semibold text-white">
           Email verification
         </h1>
 
-        <p className="mt-4 text-sm text-gray-400">{message}</p>
+        <p className="mt-4 text-sm text-text-muted">{message}</p>
 
         {status === "loading" && (
-          <div className="mt-6 text-sm text-gray-500">Please wait...</div>
+          <div className="mt-6 text-sm text-text-faint">Please wait...</div>
         )}
 
         {status === "success" && (
-          <Link
-            to={isAuthenticated ? "/dashboard" : "/auth"}
-            className="mt-6 inline-block rounded-lg bg-white px-5 py-2.5 text-sm font-medium text-black transition hover:bg-gray-200"
-          >
+          <Button as={Link} to={isAuthenticated ? "/dashboard" : "/auth"} className="mt-6">
             {isAuthenticated ? "Go to dashboard" : "Go to login"}
-          </Link>
+          </Button>
         )}
 
         {status === "error" && (
           <Link
             to="/"
-            className="mt-6 inline-block rounded-lg border border-[#333] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#202020]"
+            className={`mt-6 inline-block rounded-control border border-border-default px-5 py-2.5 text-sm font-medium text-white transition hover:bg-white/[0.04] ${focusRing}`}
           >
             Back to home
           </Link>

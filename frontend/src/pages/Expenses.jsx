@@ -2,6 +2,11 @@ import { useState } from "react";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 
 import AddExpenseModal from "../components/AddExpenseModal";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
+import Card from "../components/ui/Card";
+import Pill from "../components/ui/Pill";
+import { focusRing } from "../components/ui/styles";
 import { useFinance } from "../context/FinanceContext";
 
 function Expenses() {
@@ -49,7 +54,7 @@ function Expenses() {
   );
 
   return (
-    <div className="px-8 py-8">
+    <div className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -57,42 +62,34 @@ function Expenses() {
             Expenses
           </h1>
 
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-text-muted">
             Manage and track your expenses.
           </p>
         </div>
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-zinc-200"
-        >
+        <Button onClick={() => setIsModalOpen(true)}>
           <Plus size={17} />
           Add expense
-        </button>
+        </Button>
       </div>
 
       {/* Search */}
       <div className="mt-8">
-        <div className="relative max-w-sm">
-          <Search
-            size={17}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600"
-          />
-
-          <input
-            type="text"
-            placeholder="Search expenses..."
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            className="w-full rounded-lg border border-[#292929] bg-[#181818] py-2.5 pl-10 pr-4 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500"
-          />
-        </div>
+        <Input
+          icon={Search}
+          type="text"
+          placeholder="Search expenses..."
+          aria-label="Search expenses"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          wrapperClassName="max-w-sm"
+        />
       </div>
 
       {/* Expenses table */}
-      <div className="mt-6 overflow-hidden rounded-xl border border-[#292929] bg-[#181818]">
+      <Card padding="p-0" className="mt-6 overflow-hidden">
         {/* Table header */}
-        <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] border-b border-[#292929] px-6 py-4 text-xs font-semibold uppercase tracking-wider text-zinc-600">
+        <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] border-b border-border-default px-6 py-4 text-xs font-semibold uppercase tracking-wider text-text-faint">
           <span>Description</span>
           <span>Category</span>
           <span>Date</span>
@@ -105,7 +102,7 @@ function Expenses() {
           filteredExpenses.map((expense) => (
             <div
               key={expense.id}
-              className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-center border-b border-[#292929] px-6 py-4 last:border-0"
+              className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-center border-b border-border-default px-6 py-4 last:border-0"
             >
               {/* Description */}
               <div>
@@ -116,16 +113,14 @@ function Expenses() {
 
               {/* Category */}
               <div>
-                <span className="rounded-md bg-[#222222] px-2.5 py-1 text-xs text-zinc-400">
-                  {expense.category}
-                </span>
+                <Pill category={expense.category} />
               </div>
 
               {/* Date */}
-              <p className="text-sm text-zinc-500">{expense.date}</p>
+              <p className="text-sm text-text-muted">{expense.date}</p>
 
               {/* Amount */}
-              <p className="text-sm font-semibold text-zinc-300">
+              <p className="text-sm font-semibold text-slate-300">
                 -{expense.amount.toFixed(2)} zł
               </p>
 
@@ -133,7 +128,8 @@ function Expenses() {
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => handleEditExpense(expense)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 transition hover:bg-[#222222] hover:text-white"
+                  aria-label={`Edit ${expense.description}`}
+                  className={`flex h-8 w-8 items-center justify-center rounded-control text-text-muted transition hover:bg-white/[0.04] hover:text-white ${focusRing}`}
                 >
                   <Pencil size={16} />
                 </button>
@@ -141,7 +137,8 @@ function Expenses() {
                 <button
                   onClick={() => handleDeleteExpense(expense.id)}
                   disabled={deletingId === expense.id}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 transition hover:bg-[#222222] hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label={`Delete ${expense.description}`}
+                  className={`flex h-8 w-8 items-center justify-center rounded-control text-text-muted transition hover:bg-danger/10 hover:text-danger disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`}
                 >
                   <Trash2 size={16} />
                 </button>
@@ -150,16 +147,16 @@ function Expenses() {
           ))
         ) : (
           <div className="px-6 py-12 text-center">
-            <p className="text-sm font-medium text-zinc-400">
+            <p className="text-sm font-medium text-slate-300">
               No expenses found
             </p>
 
-            <p className="mt-1 text-xs text-zinc-600">
+            <p className="mt-1 text-xs text-text-faint">
               Try a different search or add a new expense.
             </p>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Modal */}
       <AddExpenseModal

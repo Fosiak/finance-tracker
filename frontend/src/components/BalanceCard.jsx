@@ -18,7 +18,7 @@ function BalanceCard() {
     <div className="rounded-2xl border border-border-default bg-surface p-6 shadow-card">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-slate-500">Balance</p>
+          <p className="text-sm text-text-muted">Balance</p>
 
           <p className="mt-2 text-3xl font-semibold tracking-tight text-white">
             {balance.toFixed(2)} zł
@@ -30,7 +30,7 @@ function BalanceCard() {
         </div>
       </div>
 
-      <p className="mt-4 text-xs text-slate-600">Current month</p>
+      <p className="mt-4 text-xs text-text-faint">Current month</p>
     </div>
   );
 }

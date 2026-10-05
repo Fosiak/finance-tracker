@@ -4,7 +4,6 @@ import { AuthProvider } from "./context/AuthContext";
 import { FinanceProvider } from "./context/FinanceContext";
 import { ToastProvider } from "./context/ToastContext";
 
-import AuthLayout from "./layouts/AuthLayout";
 import MainLayout from "./layouts/MainLayout";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -24,42 +23,42 @@ import CookiePolicy from "./pages/CookiePolicy";
 function App() {
   return (
     <ToastProvider>
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public */}
-          <Route path="/" element={<HomeRoute />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/cookie-policy" element={<CookiePolicy />} />
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public */}
+            <Route path="/" element={<HomeRoute />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/cookie-policy" element={<CookiePolicy />} />
 
-          {/* Protected — FinanceProvider only mounts once ProtectedRoute
-              has confirmed the user is authenticated, so its data fetch
-              never races the login/session-restore flow. */}
-          <Route element={<ProtectedRoute />}>
-            <Route
-              element={
-                <FinanceProvider>
-                  <MainLayout />
-                </FinanceProvider>
-              }
-            >
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/expenses" element={<Expenses />} />
+            {/* Protected — FinanceProvider only mounts once ProtectedRoute
+                has confirmed the user is authenticated, so its data fetch
+                never races the login/session-restore flow. */}
+            <Route element={<ProtectedRoute />}>
+              <Route
+                element={
+                  <FinanceProvider>
+                    <MainLayout />
+                  </FinanceProvider>
+                }
+              >
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/expenses" element={<Expenses />} />
 
-              <Route element={<RequireVerifiedEmail />}>
-                <Route path="/statistics" element={<Statistics />} />
+                <Route element={<RequireVerifiedEmail />}>
+                  <Route path="/statistics" element={<Statistics />} />
+                </Route>
+
+                <Route path="/budget" element={<Budget />} />
+                <Route path="/profile" element={<Profile />} />
               </Route>
-
-              <Route path="/budget" element={<Budget />} />
-              <Route path="/profile" element={<Profile />} />
             </Route>
-          </Route>
-        </Routes>
+          </Routes>
 
-        <CookieNotice />
-      </BrowserRouter>
-    </AuthProvider>
+          <CookieNotice />
+        </BrowserRouter>
+      </AuthProvider>
     </ToastProvider>
   );
 }

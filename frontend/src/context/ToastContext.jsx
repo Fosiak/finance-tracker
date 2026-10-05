@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useState } from "react";
 import { CheckCircle2, X, XCircle } from "lucide-react";
 
+import { focusRing } from "../components/ui/styles";
+
 const ToastContext = createContext(null);
 
 let nextId = 0;
@@ -57,13 +59,16 @@ function Toast({ toast, onDismiss }) {
   return (
     <div
       role={isError ? "alert" : "status"}
-      className={`pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border px-4 py-3 shadow-card backdrop-blur-xl ${
+      className={`pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-panel border bg-surface px-4 py-3 shadow-card backdrop-blur-xl ${
         isError
-          ? "border-red-500/20 bg-[#1a0f0f]/95 text-red-200"
-          : "border-emerald-500/20 bg-[#0f1a14]/95 text-emerald-200"
+          ? "border-danger/20 text-red-200"
+          : "border-success/20 text-emerald-200"
       }`}
     >
-      <Icon size={18} className="mt-0.5 shrink-0" />
+      <Icon
+        size={18}
+        className={`mt-0.5 shrink-0 ${isError ? "text-danger" : "text-success"}`}
+      />
 
       <p className="flex-1 text-sm leading-5">{toast.message}</p>
 
@@ -71,7 +76,7 @@ function Toast({ toast, onDismiss }) {
         type="button"
         onClick={onDismiss}
         aria-label="Dismiss"
-        className="shrink-0 text-current opacity-70 transition hover:opacity-100"
+        className={`shrink-0 rounded-control text-current opacity-70 transition hover:opacity-100 ${focusRing}`}
       >
         <X size={15} />
       </button>
