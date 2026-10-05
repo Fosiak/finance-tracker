@@ -14,7 +14,6 @@ function Budget() {
 
   const [amount, setAmount] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
     setAmount(selectedMonthBudget ? selectedMonthBudget.toString() : "");
@@ -41,13 +40,12 @@ function Budget() {
       return;
     }
 
-    setSaveError("");
     setIsSaving(true);
 
     try {
       await setBudget(selectedMonth, budgetAmount);
-    } catch (error) {
-      setSaveError(error.message);
+    } catch {
+      // FinanceContext already surfaced this via a toast.
     } finally {
       setIsSaving(false);
     }
@@ -183,12 +181,6 @@ function Budget() {
               {isSaving ? "Saving..." : "Save"}
             </button>
           </div>
-
-          {saveError && (
-            <p role="alert" className="mt-3 text-sm text-red-400">
-              {saveError}
-            </p>
-          )}
         </form>
       </div>
     </div>
