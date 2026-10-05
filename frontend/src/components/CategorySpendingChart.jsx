@@ -2,11 +2,14 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
 } from "recharts";
+
+import { getCategory } from "../constants/categories";
 
 function CategorySpendingChart({ data }) {
   return (
@@ -21,40 +24,43 @@ function CategorySpendingChart({ data }) {
             bottom: 0,
           }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#292929" />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
 
           <XAxis
             dataKey="category"
-            stroke="#71717a"
+            stroke="#94a3b8"
             tickLine={false}
             axisLine={false}
-            tickFormatter={(value) =>
-              value.charAt(0).toUpperCase() + value.slice(1)
-            }
+            tickFormatter={(value) => getCategory(value).label}
           />
 
           <YAxis
-            stroke="#71717a"
+            stroke="#94a3b8"
             tickLine={false}
             axisLine={false}
             tickFormatter={(value) => `${value} zł`}
           />
 
           <Tooltip
-            cursor={{ fill: "#222222" }}
+            cursor={{ fill: "rgba(255,255,255,0.04)" }}
             contentStyle={{
-              backgroundColor: "#181818",
-              border: "1px solid #292929",
-              borderRadius: "8px",
+              backgroundColor: "#111113",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: "10px",
               color: "#f5f5f5",
             }}
             formatter={(value) => [`${Number(value).toFixed(2)} zł`, "Spent"]}
-            labelFormatter={(label) =>
-              label.charAt(0).toUpperCase() + label.slice(1)
-            }
+            labelFormatter={(label) => getCategory(label).label}
           />
 
-          <Bar dataKey="amount" fill="#ffffff" radius={[6, 6, 0, 0]} />
+          <Bar dataKey="amount" radius={[6, 6, 0, 0]}>
+            {data.map((entry) => (
+              <Cell
+                key={entry.category}
+                fill={getCategory(entry.category).chartColor}
+              />
+            ))}
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     </div>
