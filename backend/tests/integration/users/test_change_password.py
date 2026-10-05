@@ -59,6 +59,39 @@ def test_user_can_change_password(api_client, user):
 
 
 @pytest.mark.django_db
+def test_unverified_user_cannot_change_password(api_client):
+    User.objects.create_user(
+        username="unverified",
+        email="unverified@example.com",
+        password="StrongPassword123!",
+        is_active=True,
+        email_verified=False,
+    )
+
+    response = api_client.post(
+        "/api/auth/login/",
+        {
+            "username": "unverified",
+            "password": "StrongPassword123!",
+        },
+        format="json",
+    )
+    assert response.status_code == 200
+
+    response = api_client.post(
+        "/api/auth/change-password/",
+        {
+            "current_password": "StrongPassword123!",
+            "new_password": "NewStrongPassword123!",
+            "new_password_confirm": "NewStrongPassword123!",
+        },
+        format="json",
+    )
+
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
 def test_change_password_rejects_wrong_current_password(
     api_client,
     user,

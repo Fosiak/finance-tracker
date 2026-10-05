@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Camera, Save, User, Mail, Shield } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Camera, Lock, Save, User, Mail, Shield } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
-import { updateProfile } from "../services/auth";
+import { updateProfile, uploadAvatar, changePassword } from "../services/auth";
 
 function Profile() {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, logout } = useAuth();
+  const navigate = useNavigate();
+  const isVerified = user.email_verified;
 
   const [profile, setProfile] = useState({
     firstName: user.first_name,
@@ -13,10 +16,24 @@ function Profile() {
     email: user.email,
   });
 
-  const [avatar, setAvatar] = useState(null);
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
+
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState("");
+
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    newPasswordConfirm: "",
+  });
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+
+  const avatarSrc = avatarPreview || user.avatar || null;
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -29,17 +46,30 @@ function Profile() {
     setSaved(false);
   }
 
-  function handleAvatarChange(event) {
+  async function handleAvatarChange(event) {
     const file = event.target.files?.[0];
+    event.target.value = "";
 
     if (!file) {
       return;
     }
 
-    const imageUrl = URL.createObjectURL(file);
+    setAvatarError("");
 
-    setAvatar(imageUrl);
-    setSaved(false);
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPreview(previewUrl);
+    setIsUploadingAvatar(true);
+
+    try {
+      await uploadAvatar(file);
+      await refreshUser();
+    } catch (err) {
+      setAvatarError(err.message);
+    } finally {
+      setIsUploadingAvatar(false);
+      setAvatarPreview(null);
+      URL.revokeObjectURL(previewUrl);
+    }
   }
 
   async function handleSubmit(event) {
@@ -62,6 +92,40 @@ function Profile() {
       setError(err.message);
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  function handlePasswordFieldChange(event) {
+    const { name, value } = event.target;
+
+    setPasswordForm((current) => ({ ...current, [name]: value }));
+  }
+
+  async function handlePasswordSubmit(event) {
+    event.preventDefault();
+
+    setPasswordError("");
+    setIsSavingPassword(true);
+
+    try {
+      await changePassword({
+        current_password: passwordForm.currentPassword,
+        new_password: passwordForm.newPassword,
+        new_password_confirm: passwordForm.newPasswordConfirm,
+      });
+
+      // Changing your password blacklists existing sessions server-side,
+      // so send them back to log in again with the new one.
+      await logout();
+
+      navigate("/auth", {
+        state: {
+          message: "Password changed. Please log in again.",
+        },
+      });
+    } catch (err) {
+      setPasswordError(err.message);
+      setIsSavingPassword(false);
     }
   }
 
@@ -93,9 +157,9 @@ function Profile() {
 
           <div className="mt-6 flex items-center gap-5">
             <div className="relative">
-              {avatar ? (
+              {avatarSrc ? (
                 <img
-                  src={avatar}
+                  src={avatarSrc}
                   alt="Profile"
                   className="h-20 w-20 rounded-full object-cover"
                 />
@@ -106,20 +170,30 @@ function Profile() {
                 </div>
               )}
 
-              <label
-                htmlFor="avatar"
-                className="absolute -bottom-1 -right-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[#292929] bg-[#222222] text-zinc-300 transition hover:bg-[#2a2a2a] hover:text-white"
-              >
-                <Camera size={15} />
+              {isVerified ? (
+                <label
+                  htmlFor="avatar"
+                  className="absolute -bottom-1 -right-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[#292929] bg-[#222222] text-zinc-300 transition hover:bg-[#2a2a2a] hover:text-white"
+                >
+                  <Camera size={15} />
 
-                <input
-                  id="avatar"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                  className="hidden"
-                />
-              </label>
+                  <input
+                    id="avatar"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarChange}
+                    disabled={isUploadingAvatar}
+                    className="hidden"
+                  />
+                </label>
+              ) : (
+                <div
+                  title="Verify your email to change your avatar"
+                  className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border border-[#292929] bg-[#222222] text-zinc-600"
+                >
+                  <Lock size={14} />
+                </div>
+              )}
             </div>
 
             <div>
@@ -130,8 +204,18 @@ function Profile() {
               </p>
 
               <p className="mt-1 text-xs text-zinc-500">
-                JPG, PNG or WebP. Maximum 5 MB.
+                {isVerified
+                  ? isUploadingAvatar
+                    ? "Uploading..."
+                    : "JPG, PNG or WebP. Maximum 5 MB."
+                  : "Verify your email to change your avatar."}
               </p>
+
+              {avatarError && (
+                <p role="alert" className="mt-1 text-xs text-red-400">
+                  {avatarError}
+                </p>
+              )}
             </div>
           </div>
         </section>
@@ -274,17 +358,121 @@ function Profile() {
               <p className="text-sm font-medium text-white">Password</p>
 
               <p className="mt-1 text-xs text-zinc-600">
-                Change your account password.
+                {isVerified
+                  ? "Change your account password."
+                  : "Verify your email to change your password."}
               </p>
             </div>
 
-            <button
-              type="button"
-              className="rounded-lg border border-[#292929] bg-[#111111] px-4 py-2.5 text-sm font-medium text-zinc-300 transition hover:bg-[#222222] hover:text-white"
-            >
-              Change password
-            </button>
+            {isVerified && (
+              <button
+                type="button"
+                onClick={() => setIsChangingPassword((current) => !current)}
+                className="rounded-lg border border-[#292929] bg-[#111111] px-4 py-2.5 text-sm font-medium text-zinc-300 transition hover:bg-[#222222] hover:text-white"
+              >
+                {isChangingPassword ? "Cancel" : "Change password"}
+              </button>
+            )}
+
+            {!isVerified && (
+              <div
+                title="Verify your email to change your password"
+                className="flex items-center gap-2 rounded-lg border border-[#292929] bg-[#111111] px-4 py-2.5 text-sm font-medium text-zinc-600"
+              >
+                <Lock size={14} />
+                Change password
+              </div>
+            )}
           </div>
+
+          {isVerified && isChangingPassword && (
+            <form
+              onSubmit={handlePasswordSubmit}
+              className="mt-5 space-y-4 border-t border-[#292929] pt-5"
+            >
+              <div>
+                <label
+                  htmlFor="currentPassword"
+                  className="mb-2 block text-sm font-medium text-zinc-300"
+                >
+                  Current password
+                </label>
+
+                <input
+                  id="currentPassword"
+                  name="currentPassword"
+                  type="password"
+                  value={passwordForm.currentPassword}
+                  onChange={handlePasswordFieldChange}
+                  required
+                  autoComplete="current-password"
+                  className="w-full rounded-lg border border-[#292929] bg-[#111111] px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500"
+                />
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="newPassword"
+                    className="mb-2 block text-sm font-medium text-zinc-300"
+                  >
+                    New password
+                  </label>
+
+                  <input
+                    id="newPassword"
+                    name="newPassword"
+                    type="password"
+                    value={passwordForm.newPassword}
+                    onChange={handlePasswordFieldChange}
+                    required
+                    autoComplete="new-password"
+                    className="w-full rounded-lg border border-[#292929] bg-[#111111] px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="newPasswordConfirm"
+                    className="mb-2 block text-sm font-medium text-zinc-300"
+                  >
+                    Confirm new password
+                  </label>
+
+                  <input
+                    id="newPasswordConfirm"
+                    name="newPasswordConfirm"
+                    type="password"
+                    value={passwordForm.newPasswordConfirm}
+                    onChange={handlePasswordFieldChange}
+                    required
+                    autoComplete="new-password"
+                    className="w-full rounded-lg border border-[#292929] bg-[#111111] px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <p className="text-xs text-zinc-600">
+                  You'll be signed out and asked to log in again.
+                </p>
+
+                <button
+                  type="submit"
+                  disabled={isSavingPassword}
+                  className="rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isSavingPassword ? "Saving..." : "Save new password"}
+                </button>
+              </div>
+
+              {passwordError && (
+                <p role="alert" className="text-right text-xs text-red-400">
+                  {passwordError}
+                </p>
+              )}
+            </form>
+          )}
         </section>
       </div>
     </div>

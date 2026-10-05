@@ -35,3 +35,26 @@ export async function updateProfile(data) {
     body: JSON.stringify(data),
   });
 }
+
+export async function resendVerificationEmail() {
+  return apiRequest("/api/auth/resend-verification/", {
+    method: "POST",
+  });
+}
+
+export async function uploadAvatar(file) {
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  return apiRequest("/api/auth/profile/avatar/", {
+    method: "PATCH",
+    body: formData,
+  });
+}
+
+export async function changePassword(data) {
+  return apiRequest("/api/auth/change-password/", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}

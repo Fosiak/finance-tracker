@@ -35,6 +35,11 @@ class ProfileSerializer(serializers.ModelSerializer):
             "id",
             "username",
             "email_verified",
+            # Avatar changes go through AvatarSerializer/AvatarUploadView
+            # instead, which are gated behind IsEmailVerified - this
+            # endpoint stays open to unverified users for name/email
+            # edits, so avatar can't be writable here too.
+            "avatar",
         ]
 
     def validate_email(self, value):
@@ -71,3 +76,9 @@ class ProfileSerializer(serializers.ModelSerializer):
             instance,
             validated_data,
         )
+
+
+class AvatarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["avatar"]

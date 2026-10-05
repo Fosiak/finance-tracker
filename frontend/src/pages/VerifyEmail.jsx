@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
+import { useAuth } from "../context/AuthContext";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 function VerifyEmail() {
   const [searchParams] = useSearchParams();
+  const { isAuthenticated, refreshUser } = useAuth();
 
   const [status, setStatus] = useState("loading");
   const [message, setMessage] = useState("Verifying your email...");
@@ -35,6 +38,13 @@ function VerifyEmail() {
 
         setStatus("success");
         setMessage(data.detail);
+
+        // If they're already logged in in this tab, refresh the cached
+        // user so email_verified flips without needing a reload (e.g.
+        // dismisses the EmailVerificationBanner immediately).
+        if (isAuthenticated) {
+          refreshUser();
+        }
       } catch {
         setStatus("error");
         setMessage("Could not connect to the server.");
@@ -42,6 +52,9 @@ function VerifyEmail() {
     }
 
     verifyEmail();
+    // Only re-run when the link's params change - isAuthenticated/
+    // refreshUser are read at verification time, not reactively.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   return (
@@ -59,10 +72,10 @@ function VerifyEmail() {
 
         {status === "success" && (
           <Link
-            to="/auth"
+            to={isAuthenticated ? "/dashboard" : "/auth"}
             className="mt-6 inline-block rounded-lg bg-white px-5 py-2.5 text-sm font-medium text-black transition hover:bg-gray-200"
           >
-            Go to login
+            {isAuthenticated ? "Go to dashboard" : "Go to login"}
           </Link>
         )}
 

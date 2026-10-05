@@ -4,6 +4,7 @@ import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import Footer from "../components/Footer";
+import EmailVerificationBanner from "../components/EmailVerificationBanner";
 
 function MainLayout() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
@@ -18,6 +19,8 @@ function MainLayout() {
 
         <div className="flex min-w-0 flex-1 flex-col">
           <Navbar onOpenMobileNav={() => setIsMobileNavOpen(true)} />
+
+          <EmailVerificationBanner />
 
           <main className="min-w-0 flex-1">
             <Outlet />
