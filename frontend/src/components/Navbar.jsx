@@ -92,9 +92,17 @@ function Navbar({ onOpenMobileNav }) {
             aria-haspopup="menu"
             className="flex cursor-pointer items-center gap-2 rounded-xl px-2 py-1.5 transition-all duration-200 hover:bg-white/[0.04]"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-xs font-semibold text-blue-400">
-              {initials}
-            </div>
+            {user.avatar ? (
+              <img
+                src={user.avatar}
+                alt=""
+                className="h-8 w-8 rounded-lg object-cover"
+              />
+            ) : (
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-xs font-semibold text-blue-400">
+                {initials}
+              </div>
+            )}
 
             <div className="hidden text-left sm:block">
               <p className="text-sm font-medium text-slate-200">
