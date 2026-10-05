@@ -10,6 +10,7 @@ from rest_framework_simplejwt.token_blacklist.models import (
     BlacklistedToken,
 )
 
+from users.permissions import IsEmailVerified
 from users.serializers.password import (
     ChangePasswordSerializer,
     PasswordResetRequestSerializer,
@@ -30,7 +31,7 @@ User = get_user_model()
 
 class ChangePasswordView(generics.GenericAPIView):
     serializer_class = ChangePasswordSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsEmailVerified]
 
     def get_object(self):
         return self.request.user

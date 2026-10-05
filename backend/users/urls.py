@@ -5,7 +5,7 @@ from users.views.auth import (
     SecureLoginView,
     SecureTokenRefreshView,
 )
-from users.views.profile import ProfileView
+from users.views.profile import AvatarUploadView, ProfileView
 from users.views.password import (
     ChangePasswordView,
     PasswordResetRequestView,
@@ -47,6 +47,12 @@ urlpatterns = [
         "profile/",
         ProfileView.as_view(),
         name="profile",
+    ),
+
+    path(
+        "profile/avatar/",
+        AvatarUploadView.as_view(),
+        name="profile_avatar",
     ),
 
     path(
