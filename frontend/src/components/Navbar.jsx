@@ -10,7 +10,7 @@ import {
 
 import { useAuth } from "../context/AuthContext";
 
-function Navbar() {
+function Navbar({ onOpenMobileNav }) {
   const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -56,6 +56,7 @@ function Navbar() {
       {/* Mobile menu */}
       <button
         type="button"
+        onClick={onOpenMobileNav}
         className="cursor-pointer rounded-xl p-2 text-slate-500 transition-all duration-200 hover:bg-white/[0.04] hover:text-white lg:hidden"
         aria-label="Open navigation"
       >
