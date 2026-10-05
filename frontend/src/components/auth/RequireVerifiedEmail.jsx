@@ -17,7 +17,7 @@ function RequireVerifiedEmail() {
           Verify your email to unlock this page
         </h1>
 
-        <p className="mt-2 max-w-sm text-sm text-slate-500">
+        <p className="mt-2 max-w-sm text-sm text-text-muted">
           Confirm your email address to access Statistics. Use the resend
           link in the banner above if your verification email expired.
         </p>

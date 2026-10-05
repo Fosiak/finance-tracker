@@ -9,11 +9,13 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
+import { focusRing } from "./ui/styles";
 
-function Navbar({ onOpenMobileNav }) {
+function Navbar({ onOpenMobileNav, mobileNavTriggerRef }) {
   const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const menuTriggerRef = useRef(null);
 
   const displayName =
     user.first_name || user.last_name
@@ -24,6 +26,14 @@ function Navbar({ onOpenMobileNav }) {
     ? `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`
     : user.username.slice(0, 2)
   ).toUpperCase();
+
+  function closeMenu({ returnFocus } = {}) {
+    setIsMenuOpen(false);
+
+    if (returnFocus) {
+      menuTriggerRef.current?.focus();
+    }
+  }
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -38,7 +48,7 @@ function Navbar({ onOpenMobileNav }) {
 
     function handleEscape(event) {
       if (event.key === "Escape") {
-        setIsMenuOpen(false);
+        closeMenu({ returnFocus: true });
       }
     }
 
@@ -55,9 +65,10 @@ function Navbar({ onOpenMobileNav }) {
     <header className="flex h-20 shrink-0 items-center justify-between border-b border-white/[0.06] bg-app/80 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
       {/* Mobile menu */}
       <button
+        ref={mobileNavTriggerRef}
         type="button"
         onClick={onOpenMobileNav}
-        className="cursor-pointer rounded-xl p-2 text-slate-500 transition-all duration-200 hover:bg-white/[0.04] hover:text-white lg:hidden"
+        className={`cursor-pointer rounded-control p-2 text-text-muted transition-all duration-200 hover:bg-white/[0.04] hover:text-white lg:hidden ${focusRing}`}
         aria-label="Open navigation"
       >
         <Menu size={20} />
@@ -65,7 +76,7 @@ function Navbar({ onOpenMobileNav }) {
 
       {/* Page context */}
       <div className="hidden lg:block">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-text-faint">
           Personal finance
         </p>
       </div>
@@ -76,30 +87,30 @@ function Navbar({ onOpenMobileNav }) {
         <button
           type="button"
           aria-label="Notifications"
-          className="relative cursor-pointer rounded-xl p-2.5 text-slate-500 transition-all duration-200 hover:bg-white/[0.04] hover:text-slate-200"
+          className={`relative cursor-pointer rounded-control p-2.5 text-text-muted transition-all duration-200 hover:bg-white/[0.04] hover:text-slate-200 ${focusRing}`}
         >
           <Bell size={19} />
 
-          <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-blue-500" />
+          <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-primary" />
         </button>
 
         {/* User */}
         <div className="relative" ref={menuRef}>
           <button
+            ref={menuTriggerRef}
             type="button"
             onClick={() => setIsMenuOpen((current) => !current)}
             aria-expanded={isMenuOpen}
-            aria-haspopup="menu"
-            className="flex cursor-pointer items-center gap-2 rounded-xl px-2 py-1.5 transition-all duration-200 hover:bg-white/[0.04]"
+            className={`flex cursor-pointer items-center gap-2 rounded-control px-2 py-1.5 transition-all duration-200 hover:bg-white/[0.04] ${focusRing}`}
           >
             {user.avatar ? (
               <img
                 src={user.avatar}
                 alt=""
-                className="h-8 w-8 rounded-lg object-cover"
+                className="h-8 w-8 rounded-control object-cover"
               />
             ) : (
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-xs font-semibold text-blue-400">
+              <div className="flex h-8 w-8 items-center justify-center rounded-control bg-primary/10 text-xs font-semibold text-primary">
                 {initials}
               </div>
             )}
@@ -109,34 +120,30 @@ function Navbar({ onOpenMobileNav }) {
                 {displayName}
               </p>
 
-              <p className="text-xs text-slate-600">{user.email}</p>
+              <p className="text-xs text-text-faint">{user.email}</p>
             </div>
 
             <ChevronDown
               size={16}
-              className={`shrink-0 text-slate-600 transition-transform duration-200 ${
+              className={`shrink-0 text-text-faint transition-transform duration-200 ${
                 isMenuOpen ? "rotate-180" : ""
               }`}
             />
           </button>
 
           {isMenuOpen && (
-            <div
-              role="menu"
-              className="absolute right-0 top-full z-20 mt-2 w-56 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border-default bg-surface shadow-card"
-            >
+            <div className="absolute right-0 top-full z-20 mt-2 w-56 max-w-[calc(100vw-2rem)] overflow-hidden rounded-panel border border-border-default bg-surface shadow-card">
               <div className="border-b border-border-default px-4 py-3 sm:hidden">
                 <p className="text-sm font-medium text-slate-200">
                   {displayName}
                 </p>
-                <p className="mt-0.5 text-xs text-slate-600">{user.email}</p>
+                <p className="mt-0.5 text-xs text-text-faint">{user.email}</p>
               </div>
 
               <Link
                 to="/profile"
-                role="menuitem"
-                onClick={() => setIsMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/[0.04] hover:text-white"
+                onClick={() => closeMenu()}
+                className={`flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/[0.04] hover:text-white ${focusRing}`}
               >
                 <User size={17} />
                 Profile
@@ -144,12 +151,11 @@ function Navbar({ onOpenMobileNav }) {
 
               <button
                 type="button"
-                role="menuitem"
                 onClick={() => {
-                  setIsMenuOpen(false);
+                  closeMenu();
                   logout();
                 }}
-                className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-300 transition hover:bg-red-500/[0.06] hover:text-red-400"
+                className={`flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-300 transition hover:bg-danger/[0.08] hover:text-danger ${focusRing}`}
               >
                 <LogOut size={17} />
                 Sign out

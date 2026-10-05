@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Cookie, X } from "lucide-react";
 
+import Button from "./ui/Button";
+import { focusRing } from "./ui/styles";
+
 const STORAGE_KEY = "cookie-notice-dismissed";
 
 function readDismissed() {
@@ -34,29 +37,25 @@ function CookieNotice() {
     <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border-default bg-surface/95 px-4 py-4 backdrop-blur-xl sm:px-6">
       <div className="mx-auto flex max-w-5xl flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
-          <Cookie size={18} className="mt-0.5 shrink-0 text-blue-400" />
+          <Cookie size={18} className="mt-0.5 shrink-0 text-primary" />
 
-          <p className="text-sm leading-6 text-slate-400">
+          <p className="text-sm leading-6 text-text-muted">
             We use cookies that are strictly necessary to keep you signed
             in and protect your account. No tracking, analytics, or
             marketing cookies.{" "}
             <Link
               to="/cookie-policy"
-              className="text-blue-400 underline-offset-2 hover:underline"
+              className={`rounded text-primary underline-offset-2 hover:underline ${focusRing}`}
             >
               Cookie Policy
             </Link>
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={dismiss}
-          className="flex shrink-0 items-center gap-1.5 self-end rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black transition hover:bg-zinc-200 sm:self-auto"
-        >
+        <Button onClick={dismiss} className="self-end sm:self-auto">
           Got it
           <X size={14} />
-        </button>
+        </Button>
       </div>
     </div>
   );

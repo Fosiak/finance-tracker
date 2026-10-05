@@ -3,6 +3,7 @@ import { MailWarning } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
 import { resendVerificationEmail } from "../services/auth";
+import { focusRing } from "./ui/styles";
 
 function EmailVerificationBanner() {
   const { user } = useAuth();
@@ -40,7 +41,7 @@ function EmailVerificationBanner() {
         type="button"
         onClick={handleResend}
         disabled={status === "sending" || status === "sent"}
-        className="ml-auto shrink-0 rounded-lg border border-amber-500/30 px-3 py-1.5 text-xs font-semibold text-amber-200 transition hover:bg-amber-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+        className={`ml-auto shrink-0 rounded-control border border-amber-500/30 px-3 py-1.5 text-xs font-semibold text-amber-200 transition hover:bg-amber-500/10 disabled:cursor-not-allowed disabled:opacity-60 ${focusRing}`}
       >
         {status === "sending"
           ? "Sending..."
@@ -52,7 +53,7 @@ function EmailVerificationBanner() {
       {message && (
         <p
           className={`w-full text-xs ${
-            status === "error" ? "text-red-400" : "text-amber-300"
+            status === "error" ? "text-danger" : "text-amber-300"
           }`}
         >
           {message}
