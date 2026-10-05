@@ -35,3 +35,9 @@ export async function updateProfile(data) {
     body: JSON.stringify(data),
   });
 }
+
+export async function resendVerificationEmail() {
+  return apiRequest("/api/auth/resend-verification/", {
+    method: "POST",
+  });
+}
