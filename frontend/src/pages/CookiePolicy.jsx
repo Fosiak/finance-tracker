@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, Cookie } from "lucide-react";
 
+import { focusRing } from "../components/ui/styles";
+
 const cookies = [
   {
     name: "access_token",
@@ -32,15 +34,15 @@ function CookiePolicy() {
       <div className="mx-auto max-w-3xl">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-300"
+          className={`inline-flex items-center gap-2 rounded text-sm text-text-muted transition hover:text-slate-300 ${focusRing}`}
         >
           <ArrowLeft size={16} />
           Back to home
         </Link>
 
         <div className="mt-6 flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-blue-400/20 bg-blue-500/10">
-            <Cookie size={20} className="text-blue-400" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
+            <Cookie size={20} className="text-primary" />
           </div>
 
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
@@ -80,7 +82,7 @@ function CookiePolicy() {
                   key={cookie.name}
                   className="border-b border-border-default last:border-0"
                 >
-                  <td className="px-5 py-4 font-mono text-xs text-blue-300">
+                  <td className="px-5 py-4 font-mono text-xs text-primary">
                     {cookie.name}
                   </td>
                   <td className="px-5 py-4 text-slate-400">

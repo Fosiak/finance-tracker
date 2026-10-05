@@ -15,7 +15,7 @@ function Dashboard() {
     <div className="min-h-full px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <p className="mb-2 text-sm font-medium text-blue-400">Overview</p>
+          <p className="mb-2 text-sm font-medium text-primary">Overview</p>
 
           <div className="grid gap-4 md:grid-cols-3">
             <BalanceCard />
@@ -30,7 +30,7 @@ function Dashboard() {
 
         <div className="rounded-2xl border border-border-default bg-surface p-8 shadow-card">
           {error && (
-            <p className="mb-4 text-sm text-red-400">
+            <p className="mb-4 text-sm text-danger">
               Couldn't load your data: {error}
             </p>
           )}
