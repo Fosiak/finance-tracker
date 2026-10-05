@@ -12,9 +12,11 @@ function getCookie(name) {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
-function buildHeaders(method, extraHeaders) {
+function buildHeaders(method, extraHeaders, isFormData) {
   const headers = {
-    "Content-Type": "application/json",
+    // Let the browser set "multipart/form-data; boundary=..." itself -
+    // a manually-set Content-Type here would be missing the boundary.
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...extraHeaders,
   };
 
@@ -31,12 +33,13 @@ function buildHeaders(method, extraHeaders) {
 
 async function rawFetch(endpoint, options) {
   const method = (options.method || "GET").toUpperCase();
+  const isFormData = options.body instanceof FormData;
 
   return fetch(`${API_URL}${endpoint}`, {
     credentials: "include",
     ...options,
     method,
-    headers: buildHeaders(method, options.headers),
+    headers: buildHeaders(method, options.headers, isFormData),
   });
 }
 
@@ -61,6 +64,27 @@ function refreshAccessToken() {
   return refreshPromise;
 }
 
+// DRF returns {"detail": "..."} for most errors, but field-level
+// validation errors (e.g. avatar upload) come back as
+// {"field_name": ["message"]} instead.
+function extractErrorMessage(data) {
+  if (!data) {
+    return "Something went wrong.";
+  }
+
+  if (data.detail) {
+    return data.detail;
+  }
+
+  const firstFieldErrors = Object.values(data)[0];
+
+  if (Array.isArray(firstFieldErrors) && firstFieldErrors.length > 0) {
+    return firstFieldErrors[0];
+  }
+
+  return "Something went wrong.";
+}
+
 async function apiRequest(endpoint, options = {}) {
   let response = await rawFetch(endpoint, options);
 
@@ -78,7 +102,7 @@ async function apiRequest(endpoint, options = {}) {
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(data?.detail || "Something went wrong.");
+    throw new Error(extractErrorMessage(data));
   }
 
   return data;

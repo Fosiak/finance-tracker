@@ -8,6 +8,7 @@ import MainLayout from "./layouts/MainLayout";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import HomeRoute from "./components/auth/HomeRoute";
+import RequireVerifiedEmail from "./components/auth/RequireVerifiedEmail";
 import CookieNotice from "./components/CookieNotice";
 
 import Auth from "./pages/Auth";
@@ -43,7 +44,11 @@ function App() {
             >
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/expenses" element={<Expenses />} />
-              <Route path="/statistics" element={<Statistics />} />
+
+              <Route element={<RequireVerifiedEmail />}>
+                <Route path="/statistics" element={<Statistics />} />
+              </Route>
+
               <Route path="/budget" element={<Budget />} />
               <Route path="/profile" element={<Profile />} />
             </Route>
