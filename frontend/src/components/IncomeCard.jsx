@@ -2,11 +2,7 @@ import { TrendingUp } from "lucide-react";
 import { useFinance } from "../context/FinanceContext";
 
 function IncomeCard() {
-  const { selectedMonthExpenses } = useFinance();
-
-  const income = selectedMonthExpenses
-    .filter((expense) => expense.type === "income")
-    .reduce((total, expense) => total + expense.amount, 0);
+  const { monthIncome: income } = useFinance();
 
   return (
     <div className="rounded-2xl border border-border-default bg-surface p-6 shadow-card">

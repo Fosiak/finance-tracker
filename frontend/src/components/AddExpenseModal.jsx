@@ -7,6 +7,7 @@ import Button from "./ui/Button";
 import { CATEGORIES } from "../constants/categories";
 
 function AddExpenseModal({ isOpen, onClose, onAddExpense, editingExpense }) {
+  const [type, setType] = useState("expense");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
@@ -16,11 +17,13 @@ function AddExpenseModal({ isOpen, onClose, onAddExpense, editingExpense }) {
 
   useEffect(() => {
     if (editingExpense) {
+      setType(editingExpense.type);
       setAmount(editingExpense.amount.toString());
       setCategory(editingExpense.category);
       setDescription(editingExpense.description);
       setDate(editingExpense.date);
     } else {
+      setType("expense");
       setAmount("");
       setCategory("");
       setDescription("");
@@ -32,9 +35,8 @@ function AddExpenseModal({ isOpen, onClose, onAddExpense, editingExpense }) {
     event.preventDefault();
 
     const expense = {
-      id: editingExpense ? editingExpense.id : Date.now(),
-
-      type: "expense",
+      ...(editingExpense && { id: editingExpense.id }),
+      type,
       amount: Number(amount),
       category,
       description,
@@ -64,14 +66,23 @@ function AddExpenseModal({ isOpen, onClose, onAddExpense, editingExpense }) {
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title={editingExpense ? "Edit expense" : "Add expense"}
+      title={editingExpense ? "Edit transaction" : "Add transaction"}
       description={
         editingExpense
-          ? "Update your expense details."
-          : "Add a new expense to your budget."
+          ? "Update your transaction details."
+          : "Add a new income or expense."
       }
     >
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+        <Select
+          label="Type"
+          value={type}
+          onChange={(event) => setType(event.target.value)}
+        >
+          <option value="expense">Expense</option>
+          <option value="income">Income</option>
+        </Select>
+
         <Input
           label="Amount"
           type="number"
@@ -133,7 +144,7 @@ function AddExpenseModal({ isOpen, onClose, onAddExpense, editingExpense }) {
               ? "Saving..."
               : editingExpense
                 ? "Save changes"
-                : "Add expense"}
+                : "Add transaction"}
           </Button>
         </div>
       </form>

@@ -18,7 +18,7 @@ function Expenses() {
 
   const [deletingId, setDeletingId] = useState(null);
 
-  const { selectedMonthExpenses, addExpense, deleteExpense, updateExpense } =
+  const { selectedMonthTransactions, addExpense, deleteExpense, updateExpense } =
     useFinance();
 
   async function handleDeleteExpense(id) {
@@ -49,7 +49,7 @@ function Expenses() {
     setEditingExpense(null);
   }
 
-  const filteredExpenses = selectedMonthExpenses.filter((expense) =>
+  const filteredExpenses = selectedMonthTransactions.filter((expense) =>
     expense.description.toLowerCase().includes(search.toLowerCase()),
   );
 
@@ -63,13 +63,13 @@ function Expenses() {
           </h1>
 
           <p className="mt-1 text-sm text-text-muted">
-            Manage and track your expenses.
+            Manage and track your income and expenses.
           </p>
         </div>
 
         <Button onClick={() => setIsModalOpen(true)}>
           <Plus size={17} />
-          Add expense
+          Add transaction
         </Button>
       </div>
 
@@ -78,8 +78,8 @@ function Expenses() {
         <Input
           icon={Search}
           type="text"
-          placeholder="Search expenses..."
-          aria-label="Search expenses"
+          placeholder="Search transactions..."
+          aria-label="Search transactions"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           wrapperClassName="max-w-sm"
@@ -148,11 +148,11 @@ function Expenses() {
         ) : (
           <div className="px-6 py-12 text-center">
             <p className="text-sm font-medium text-slate-300">
-              No expenses found
+              No transactions found
             </p>
 
             <p className="mt-1 text-xs text-text-faint">
-              Try a different search or add a new expense.
+              Try a different search or add a new transaction.
             </p>
           </div>
         )}

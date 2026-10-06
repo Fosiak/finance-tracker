@@ -2,11 +2,7 @@ import { TrendingDown } from "lucide-react";
 import { useFinance } from "../context/FinanceContext";
 
 function ExpenseCard() {
-  const { selectedMonthExpenses } = useFinance();
-
-  const expenses = selectedMonthExpenses
-    .filter((expense) => expense.type === "expense")
-    .reduce((total, expense) => total + expense.amount, 0);
+  const { monthExpenses: expenses } = useFinance();
 
   return (
     <div className="rounded-2xl border border-border-default bg-surface p-6 shadow-card">

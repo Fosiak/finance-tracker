@@ -12,7 +12,13 @@ import { useToast } from "./ToastContext";
 const FinanceContext = createContext(null);
 
 function currentMonth() {
-  return new Date().toISOString().slice(0, 7);
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  return `${now.getFullYear()}-${month}`;
+}
+
+function sumAmounts(transactions) {
+  return transactions.reduce((total, item) => total + item.amount, 0);
 }
 
 function FinanceProvider({ children }) {
@@ -64,12 +70,12 @@ function FinanceProvider({ children }) {
   }, [showError]);
 
   async function addExpense(expense) {
-    const { id: _ignoredClientId, ...payload } = expense;
+    const payload = expense;
 
     try {
       const created = await createTransaction(payload);
       setExpenses((current) => [created, ...current]);
-      showSuccess("Expense added.");
+      showSuccess("Transaction added.");
     } catch (err) {
       showError(err.message);
       throw err;
@@ -80,7 +86,7 @@ function FinanceProvider({ children }) {
     try {
       await deleteTransactionRequest(id);
       setExpenses((current) => current.filter((expense) => expense.id !== id));
-      showSuccess("Expense deleted.");
+      showSuccess("Transaction deleted.");
     } catch (err) {
       showError(err.message);
       throw err;
@@ -95,7 +101,7 @@ function FinanceProvider({ children }) {
       setExpenses((current) =>
         current.map((expense) => (expense.id === id ? saved : expense)),
       );
-      showSuccess("Expense updated.");
+      showSuccess("Transaction updated.");
     } catch (err) {
       showError(err.message);
       throw err;
@@ -117,9 +123,21 @@ function FinanceProvider({ children }) {
     return budgets[month] ?? 0;
   }
 
-  const selectedMonthExpenses = expenses.filter((expense) =>
-    expense.date.startsWith(selectedMonth),
+  const selectedMonthTransactions = expenses.filter((transaction) =>
+    transaction.date.startsWith(selectedMonth),
   );
+
+  const selectedMonthExpenses = selectedMonthTransactions.filter(
+    (transaction) => transaction.type === "expense",
+  );
+
+  const monthIncome = sumAmounts(
+    selectedMonthTransactions.filter(
+      (transaction) => transaction.type === "income",
+    ),
+  );
+  const monthExpenses = sumAmounts(selectedMonthExpenses);
+  const monthBalance = monthIncome - monthExpenses;
 
   const selectedMonthBudget = getBudgetForMonth(selectedMonth);
 
@@ -129,7 +147,11 @@ function FinanceProvider({ children }) {
         expenses,
         selectedMonth,
         setSelectedMonth,
+        selectedMonthTransactions,
         selectedMonthExpenses,
+        monthIncome,
+        monthExpenses,
+        monthBalance,
 
         budgets,
         setBudget,
