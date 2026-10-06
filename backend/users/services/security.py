@@ -57,3 +57,10 @@ def log_email_verified(user):
         "EMAIL_VERIFIED user_id=%s",
         user.pk,
     )
+
+
+def log_account_deleted(user_id):
+    security_logger.info(
+        "ACCOUNT_DELETED user_id=%s",
+        user_id,
+    )

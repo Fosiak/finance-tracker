@@ -135,7 +135,7 @@ function Budget() {
           aria-valuemin={0}
           aria-valuemax={100}
           aria-label="Budget usage"
-          className="mt-5 h-2 overflow-hidden rounded-full bg-white/[0.06]"
+          className="mt-5 h-2 overflow-hidden rounded-full bg-white/6"
         >
           <div
             className={`h-full rounded-full transition-all motion-reduce:transition-none ${

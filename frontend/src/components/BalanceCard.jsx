@@ -2,17 +2,7 @@ import { Wallet } from "lucide-react";
 import { useFinance } from "../context/FinanceContext";
 
 function BalanceCard() {
-  const { selectedMonthExpenses } = useFinance();
-
-  const income = selectedMonthExpenses
-    .filter((expense) => expense.type === "income")
-    .reduce((total, expense) => total + expense.amount, 0);
-
-  const expenses = selectedMonthExpenses
-    .filter((expense) => expense.type === "expense")
-    .reduce((total, expense) => total + expense.amount, 0);
-
-  const balance = income - expenses;
+  const { monthBalance: balance } = useFinance();
 
   return (
     <div className="rounded-2xl border border-border-default bg-surface p-6 shadow-card">

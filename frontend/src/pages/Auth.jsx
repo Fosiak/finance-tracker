@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   CheckCircle2,
@@ -354,7 +354,9 @@ function Auth() {
                             isLogin ? "current-password" : "new-password"
                           }
                           visible={showPassword}
-                          onToggle={() => setShowPassword((current) => !current)}
+                          onToggle={() =>
+                            setShowPassword((current) => !current)
+                          }
                         />
                       )}
 
@@ -403,6 +405,17 @@ function Auth() {
                       )}
                     </div>
 
+                    {isLogin && (
+                      <div className="mt-3 shrink-0 text-right">
+                        <Link
+                          to="/forgot-password"
+                          className="rounded text-xs text-slate-500 transition hover:text-slate-300 focus-visible:outline-2 focus-visible:outline-primary"
+                        >
+                          Forgot password?
+                        </Link>
+                      </div>
+                    )}
+
                     {/* Submit — zawsze przyklejony do dołu formularza */}
                     <div className="mt-4 flex shrink-0 gap-3">
                       {!isLogin && registerStep === 2 && (
@@ -410,36 +423,36 @@ function Auth() {
                           type="button"
                           onClick={goToPreviousStep}
                           disabled={isLoading}
-                          className="shrink-0 rounded-xl border border-border-default px-4 py-3 text-sm font-semibold text-slate-300 transition-all duration-200 hover:bg-white/[0.04] disabled:cursor-not-allowed disabled:opacity-50 sm:py-3.5"
+                          className="shrink-0 rounded-xl border border-border-default px-4 py-3 text-sm font-semibold text-slate-300 transition-all duration-200 hover:bg-white/4 disabled:cursor-not-allowed disabled:opacity-50 sm:py-3.5"
                         >
                           Back
                         </button>
                       )}
 
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/10 transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-xl hover:shadow-blue-500/20 focus:outline-none focus:ring-2 focus:ring-blue-500/40 active:translate-y-0 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 sm:py-3.5"
-                    >
-                      <span>
-                        {isLogin
-                          ? isLoading
-                            ? "Signing in..."
-                            : "Sign in"
-                          : registerStep === 1
-                            ? "Continue"
-                            : isLoading
-                              ? "Creating account..."
-                              : "Create account"}
-                      </span>
+                      <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/10 transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-xl hover:shadow-blue-500/20 focus:outline-none focus:ring-2 focus:ring-blue-500/40 active:translate-y-0 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 sm:py-3.5"
+                      >
+                        <span>
+                          {isLogin
+                            ? isLoading
+                              ? "Signing in..."
+                              : "Sign in"
+                            : registerStep === 1
+                              ? "Continue"
+                              : isLoading
+                                ? "Creating account..."
+                                : "Create account"}
+                        </span>
 
-                      {!isLoading && (
-                        <ArrowRight
-                          size={17}
-                          className="transition-transform duration-200 group-hover:translate-x-1"
-                        />
-                      )}
-                    </button>
+                        {!isLoading && (
+                          <ArrowRight
+                            size={17}
+                            className="transition-transform duration-200 group-hover:translate-x-1"
+                          />
+                        )}
+                      </button>
                     </div>
                   </form>
 

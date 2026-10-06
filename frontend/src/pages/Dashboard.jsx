@@ -5,7 +5,7 @@ import IncomeCard from "../components/IncomeCard";
 import { useFinance } from "../context/FinanceContext";
 
 function Dashboard() {
-  const { isLoading, error, selectedMonthExpenses } = useFinance();
+  const { isLoading, error, selectedMonthTransactions } = useFinance();
 
   if (isLoading) {
     return <DashboardSkeleton />;
@@ -35,13 +35,13 @@ function Dashboard() {
             </p>
           )}
 
-          {selectedMonthExpenses.length === 0 ? (
+          {selectedMonthTransactions.length === 0 ? (
             <p className="text-sm text-slate-500">
               No transactions yet this month.
             </p>
           ) : (
             <div className="space-y-3">
-              {selectedMonthExpenses.slice(0, 5).map((expense) => (
+              {selectedMonthTransactions.slice(0, 5).map((expense) => (
                 <div
                   key={expense.id}
                   className="flex items-center justify-between border-b border-border-subtle pb-3 last:border-0 last:pb-0"
@@ -52,8 +52,15 @@ function Dashboard() {
                     </p>
                     <p className="text-xs text-slate-500">{expense.date}</p>
                   </div>
-                  <p className="text-sm font-semibold text-slate-300">
-                    -{expense.amount.toFixed(2)} zł
+                  <p
+                    className={`text-sm font-semibold ${
+                      expense.type === "income"
+                        ? "text-success"
+                        : "text-slate-300"
+                    }`}
+                  >
+                    {expense.type === "income" ? "+" : "-"}
+                    {expense.amount.toFixed(2)} zł
                   </p>
                 </div>
               ))}
