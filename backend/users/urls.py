@@ -15,6 +15,7 @@ from users.views.verification import (
     VerifyEmailView,
     ResendVerificationEmailView,
 )
+from users.views.account import DeleteAccountView
 from users.views.logout import LogoutView
 from users.views.csrf import CsrfTokenView
 
@@ -83,6 +84,11 @@ urlpatterns = [
         "password-reset-confirm/",
         PasswordResetConfirmView.as_view(),
         name="password_reset_confirm",
+    ),
+    path(
+        "delete-account/",
+        DeleteAccountView.as_view(),
+        name="delete_account",
     ),
     path(
         "logout/",

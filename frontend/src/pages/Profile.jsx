@@ -9,10 +9,12 @@ import {
   uploadAvatar,
   deleteAvatar,
   changePassword,
+  deleteAccount,
 } from "../services/auth";
 import Card from "../components/ui/Card";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
+import Dialog from "../components/ui/Dialog";
 import { focusRing } from "../components/ui/styles";
 
 function Profile() {
@@ -41,6 +43,10 @@ function Profile() {
     newPasswordConfirm: "",
   });
   const [isSavingPassword, setIsSavingPassword] = useState(false);
+
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const avatarSrc = avatarPreview || user.avatar || null;
 
@@ -144,6 +150,35 @@ function Profile() {
     } catch (err) {
       showError(err.message);
       setIsSavingPassword(false);
+    }
+  }
+
+  function closeDeleteDialog() {
+    if (isDeleting) return;
+
+    setIsDeleteOpen(false);
+    setDeletePassword("");
+  }
+
+  async function handleDeleteAccount(event) {
+    event.preventDefault();
+
+    setIsDeleting(true);
+
+    try {
+      await deleteAccount(deletePassword);
+
+      // The session is already gone server-side; clear local state
+      // without calling /logout/ (which would 401).
+      await logout().catch(() => {});
+
+      navigate("/auth", {
+        replace: true,
+        state: { message: "Your account and all your data were deleted." },
+      });
+    } catch (err) {
+      showError(err.message);
+      setIsDeleting(false);
     }
   }
 
@@ -414,7 +449,79 @@ function Profile() {
             </form>
           )}
         </Card>
+
+        {/* Danger zone */}
+        <Card className="mt-6 border-danger/30">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-control bg-danger/10">
+              <Trash2 size={18} className="text-danger" />
+            </div>
+
+            <div>
+              <h2 className="text-base font-semibold text-white">
+                Delete account
+              </h2>
+
+              <p className="mt-1 text-sm text-text-muted">
+                Permanently delete your account and all your data.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 flex items-center justify-between gap-4 border-t border-border-default pt-5">
+            <p className="text-xs text-text-faint">
+              All expenses, income, budgets and your profile picture will be
+              removed. This cannot be undone.
+            </p>
+
+            <Button
+              variant="danger"
+              className="shrink-0 border border-danger/40 text-danger"
+              onClick={() => setIsDeleteOpen(true)}
+            >
+              Delete account
+            </Button>
+          </div>
+        </Card>
       </div>
+
+      <Dialog
+        isOpen={isDeleteOpen}
+        onClose={closeDeleteDialog}
+        title="Delete your account?"
+        description="This permanently removes your account and your entire history. This cannot be undone."
+      >
+        <form onSubmit={handleDeleteAccount} className="mt-6 space-y-5">
+          <Input
+            label="Confirm with your password"
+            type="password"
+            required
+            autoComplete="current-password"
+            value={deletePassword}
+            onChange={(event) => setDeletePassword(event.target.value)}
+          />
+
+          <div className="flex justify-end gap-3 border-t border-border-default pt-5">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={closeDeleteDialog}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              type="submit"
+              variant="danger"
+              className="border border-danger/40 text-danger"
+              disabled={isDeleting || !deletePassword}
+            >
+              {isDeleting ? "Deleting..." : "Delete forever"}
+            </Button>
+          </div>
+        </form>
+      </Dialog>
     </div>
   );
 }

@@ -88,3 +88,10 @@ export async function confirmPasswordReset({
     }),
   });
 }
+
+export async function deleteAccount(password) {
+  return apiRequest("/api/auth/delete-account/", {
+    method: "POST",
+    body: JSON.stringify({ password }),
+  });
+}

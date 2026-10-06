@@ -82,3 +82,18 @@ class AvatarSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["avatar"]
+
+
+class DeleteAccountSerializer(serializers.Serializer):
+    # Re-authentication: a stolen session alone must not be enough to
+    # irreversibly wipe an account.
+    password = serializers.CharField(
+        write_only=True,
+        trim_whitespace=False,
+    )
+
+    def validate_password(self, value):
+        if not self.context["request"].user.check_password(value):
+            raise serializers.ValidationError("Password is incorrect.")
+
+        return value
