@@ -292,6 +292,7 @@ REST_FRAMEWORK = {
         "login": "5/minute",
         "register": "3/hour",
         "resend_verification": "3/hour",
+        "health": "60/minute",
     },
 }
 
