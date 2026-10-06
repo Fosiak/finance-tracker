@@ -30,16 +30,13 @@ function ToastProvider({ children }) {
     [show],
   );
 
-  const showError = useCallback(
-    (message) => show(message, "error"),
-    [show],
-  );
+  const showError = useCallback((message) => show(message, "error"), [show]);
 
   return (
     <ToastContext.Provider value={{ showSuccess, showError }}>
       {children}
 
-      <div className="pointer-events-none fixed inset-x-0 top-20 z-[60] flex flex-col items-center gap-2 px-4 sm:items-end sm:px-6 lg:px-8">
+      <div className="pointer-events-none fixed inset-x-0 top-20 z-60 flex flex-col items-center gap-2 px-4 sm:items-end sm:px-6 lg:px-8">
         {toasts.map((toast) => (
           <Toast
             key={toast.id}

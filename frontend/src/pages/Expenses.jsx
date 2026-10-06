@@ -129,7 +129,7 @@ function Expenses() {
                 <button
                   onClick={() => handleEditExpense(expense)}
                   aria-label={`Edit ${expense.description}`}
-                  className={`flex h-8 w-8 items-center justify-center rounded-control text-text-muted transition hover:bg-white/[0.04] hover:text-white ${focusRing}`}
+                  className={`flex h-8 w-8 items-center justify-center rounded-control text-text-muted transition hover:bg-white/4 hover:text-white ${focusRing}`}
                 >
                   <Pencil size={16} />
                 </button>

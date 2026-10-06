@@ -73,7 +73,11 @@ function VerifyEmail() {
         )}
 
         {status === "success" && (
-          <Button as={Link} to={isAuthenticated ? "/dashboard" : "/auth"} className="mt-6">
+          <Button
+            as={Link}
+            to={isAuthenticated ? "/dashboard" : "/auth"}
+            className="mt-6"
+          >
             {isAuthenticated ? "Go to dashboard" : "Go to login"}
           </Button>
         )}
@@ -81,7 +85,7 @@ function VerifyEmail() {
         {status === "error" && (
           <Link
             to="/"
-            className={`mt-6 inline-block rounded-control border border-border-default px-5 py-2.5 text-sm font-medium text-white transition hover:bg-white/[0.04] ${focusRing}`}
+            className={`mt-6 inline-block rounded-control border border-border-default px-5 py-2.5 text-sm font-medium text-white transition hover:bg-white/4 ${focusRing}`}
           >
             Back to home
           </Link>

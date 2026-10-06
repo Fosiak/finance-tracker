@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  Bell,
-  ChevronDown,
-  LogOut,
-  Menu,
-  User,
-} from "lucide-react";
+import { Bell, ChevronDown, LogOut, Menu, User } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
 import { focusRing } from "./ui/styles";
@@ -22,9 +16,10 @@ function Navbar({ onOpenMobileNav, mobileNavTriggerRef }) {
       ? `${user.first_name} ${user.last_name}`.trim()
       : user.username;
 
-  const initials = (user.first_name
-    ? `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`
-    : user.username.slice(0, 2)
+  const initials = (
+    user.first_name
+      ? `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`
+      : user.username.slice(0, 2)
   ).toUpperCase();
 
   function closeMenu({ returnFocus } = {}) {
@@ -62,13 +57,13 @@ function Navbar({ onOpenMobileNav, mobileNavTriggerRef }) {
   }, [isMenuOpen]);
 
   return (
-    <header className="flex h-20 shrink-0 items-center justify-between border-b border-white/[0.06] bg-app/80 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
+    <header className="flex h-20 shrink-0 items-center justify-between border-b border-white/6 bg-app/80 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
       {/* Mobile menu */}
       <button
         ref={mobileNavTriggerRef}
         type="button"
         onClick={onOpenMobileNav}
-        className={`cursor-pointer rounded-control p-2 text-text-muted transition-all duration-200 hover:bg-white/[0.04] hover:text-white lg:hidden ${focusRing}`}
+        className={`cursor-pointer rounded-control p-2 text-text-muted transition-all duration-200 hover:bg-white/4 hover:text-white lg:hidden ${focusRing}`}
         aria-label="Open navigation"
       >
         <Menu size={20} />
@@ -76,9 +71,7 @@ function Navbar({ onOpenMobileNav, mobileNavTriggerRef }) {
 
       {/* Page context */}
       <div className="hidden lg:block">
-        <p className="text-sm text-text-faint">
-          Personal finance
-        </p>
+        <p className="text-sm text-text-faint">Personal finance</p>
       </div>
 
       {/* Right side */}
@@ -87,7 +80,7 @@ function Navbar({ onOpenMobileNav, mobileNavTriggerRef }) {
         <button
           type="button"
           aria-label="Notifications"
-          className={`relative cursor-pointer rounded-control p-2.5 text-text-muted transition-all duration-200 hover:bg-white/[0.04] hover:text-slate-200 ${focusRing}`}
+          className={`relative cursor-pointer rounded-control p-2.5 text-text-muted transition-all duration-200 hover:bg-white/4 hover:text-slate-200 ${focusRing}`}
         >
           <Bell size={19} />
 
@@ -101,7 +94,7 @@ function Navbar({ onOpenMobileNav, mobileNavTriggerRef }) {
             type="button"
             onClick={() => setIsMenuOpen((current) => !current)}
             aria-expanded={isMenuOpen}
-            className={`flex cursor-pointer items-center gap-2 rounded-control px-2 py-1.5 transition-all duration-200 hover:bg-white/[0.04] ${focusRing}`}
+            className={`flex cursor-pointer items-center gap-2 rounded-control px-2 py-1.5 transition-all duration-200 hover:bg-white/4 ${focusRing}`}
           >
             {user.avatar ? (
               <img
@@ -143,7 +136,7 @@ function Navbar({ onOpenMobileNav, mobileNavTriggerRef }) {
               <Link
                 to="/profile"
                 onClick={() => closeMenu()}
-                className={`flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/[0.04] hover:text-white ${focusRing}`}
+                className={`flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/4 hover:text-white ${focusRing}`}
               >
                 <User size={17} />
                 Profile
