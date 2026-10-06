@@ -9,6 +9,7 @@ const FOCUSABLE_SELECTOR =
 function Dialog({ isOpen, onClose, title, description, children, className = "" }) {
   const dialogRef = useRef(null);
   const triggerRef = useRef(null);
+  const onCloseRef = useRef(onClose);
   const titleId = useId();
   const descriptionId = useId();
 
@@ -24,6 +25,13 @@ function Dialog({ isOpen, onClose, title, description, children, className = "" 
     }
   }, [isOpen]);
 
+  // Parents usually pass a fresh onClose every render. Reading it through a
+  // ref keeps the effect below from re-running (and stealing focus back to
+  // the first control) on every keystroke inside the dialog.
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
   useEffect(() => {
     if (!isOpen) {
       return undefined;
@@ -34,12 +42,15 @@ function Dialog({ isOpen, onClose, title, description, children, className = "" 
       ? Array.from(node.querySelectorAll(FOCUSABLE_SELECTOR))
       : [];
 
-    focusable[0]?.focus();
+    // Prefer the first form control; fall back to the first focusable
+    // element (the close button) for dialogs without one.
+    const firstField = node?.querySelector("input, select, textarea");
+    (firstField || focusable[0])?.focus();
 
     function handleKeyDown(event) {
       if (event.key === "Escape") {
         event.stopPropagation();
-        onClose();
+        onCloseRef.current();
         return;
       }
 
@@ -66,7 +77,7 @@ function Dialog({ isOpen, onClose, title, description, children, className = "" 
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) {
     return null;
