@@ -64,3 +64,27 @@ export async function changePassword(data) {
     body: JSON.stringify(data),
   });
 }
+
+export async function requestPasswordReset(email) {
+  return apiRequest("/api/auth/password-reset/", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function confirmPasswordReset({
+  uid,
+  token,
+  newPassword,
+  newPasswordConfirm,
+}) {
+  return apiRequest("/api/auth/password-reset-confirm/", {
+    method: "POST",
+    body: JSON.stringify({
+      uid,
+      token,
+      new_password: newPassword,
+      new_password_confirm: newPasswordConfirm,
+    }),
+  });
+}

@@ -18,6 +18,8 @@ import Statistics from "./pages/Statistics";
 import Budget from "./pages/Budget";
 import Profile from "./pages/Profile";
 import VerifyEmail from "./pages/VerifyEmail";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import CookiePolicy from "./pages/CookiePolicy";
 
 function App() {
@@ -29,6 +31,8 @@ function App() {
             {/* Public */}
             <Route path="/" element={<HomeRoute />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/cookie-policy" element={<CookiePolicy />} />
 

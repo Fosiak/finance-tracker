@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   CheckCircle2,
@@ -404,6 +404,17 @@ function Auth() {
                         </div>
                       )}
                     </div>
+
+                    {isLogin && (
+                      <div className="mt-3 shrink-0 text-right">
+                        <Link
+                          to="/forgot-password"
+                          className="rounded text-xs text-slate-500 transition hover:text-slate-300 focus-visible:outline-2 focus-visible:outline-primary"
+                        >
+                          Forgot password?
+                        </Link>
+                      </div>
+                    )}
 
                     {/* Submit — zawsze przyklejony do dołu formularza */}
                     <div className="mt-4 flex shrink-0 gap-3">
