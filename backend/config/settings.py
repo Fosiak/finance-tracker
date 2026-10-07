@@ -53,6 +53,16 @@ CSRF_COOKIE_DOMAIN = env(
     default=None,
 )
 
+# Default (Lax) only works because app./api. share a parent domain on
+# production. A staging frontend/backend pair on two unrelated domains
+# (e.g. *.vercel.app / *.onrender.com) is cross-site, not just cross-origin,
+# so it needs SameSite=None (which in turn requires Secure) to have the
+# cookie attached to fetch()/XHR requests at all.
+CSRF_COOKIE_SAMESITE = env(
+    "DJANGO_CSRF_COOKIE_SAMESITE",
+    default="Lax",
+)
+
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
 X_FRAME_OPTIONS = "DENY"
@@ -292,6 +302,7 @@ REST_FRAMEWORK = {
         "login": "5/minute",
         "register": "3/hour",
         "resend_verification": "3/hour",
+        "health": "60/minute",
     },
 }
 
@@ -326,6 +337,13 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS256",
 }
 
+
+# SECURITY: gates `seed_staging_data`, which deletes/recreates demo
+# accounts. Must stay unset everywhere except the staging environment.
+ALLOW_STAGING_SEED_DATA = env.bool(
+    "ALLOW_STAGING_SEED_DATA",
+    default=False,
+)
 
 FRONTEND_URL = env(
     "FRONTEND_URL",
@@ -370,3 +388,24 @@ LOGGING = {
         },
     },
 }
+
+
+# Error monitoring. Only active when a DSN is configured (local dev has
+# none, so this is a no-op there). A DSN is an ingestion endpoint, not a
+# secret - Sentry's own docs say it's safe to expose client-side.
+SENTRY_DSN = env("SENTRY_DSN", default="")
+
+if SENTRY_DSN and "pytest" not in sys.modules:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        environment=env("SENTRY_ENVIRONMENT", default="production"),
+        release=env("RENDER_GIT_COMMIT", default="dev")[:7],
+        # Errors only - no performance/profiling traces, we don't need them
+        # and they'd burn through the free plan's event quota fast.
+        traces_sample_rate=0.0,
+        send_default_pii=False,
+    )

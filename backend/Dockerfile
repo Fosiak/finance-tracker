@@ -30,6 +30,12 @@ EXPOSE 8000
 # collectstatic and migrate need DJANGO_SECRET_KEY/DATABASE_URL, which are
 # only injected at runtime on Render (not during `docker build`), so they
 # run here in the start command rather than as a RUN step.
+#
+# The seed step only fires when ALLOW_STAGING_SEED_DATA=true, which must
+# only ever be set on the staging service's env vars - never production.
+# Free-tier Render has no shell/one-off-job access, so re-seeding on every
+# boot (redeploy or wake from idle) is the only way to refresh staging data.
 CMD python manage.py collectstatic --noinput && \
     python manage.py migrate --noinput && \
+    (if [ "$ALLOW_STAGING_SEED_DATA" = "true" ]; then python manage.py seed_staging_data; fi) && \
     gunicorn config.wsgi:application --bind 0.0.0.0:8000
