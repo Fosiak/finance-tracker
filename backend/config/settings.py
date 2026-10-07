@@ -53,6 +53,16 @@ CSRF_COOKIE_DOMAIN = env(
     default=None,
 )
 
+# Default (Lax) only works because app./api. share a parent domain on
+# production. A staging frontend/backend pair on two unrelated domains
+# (e.g. *.vercel.app / *.onrender.com) is cross-site, not just cross-origin,
+# so it needs SameSite=None (which in turn requires Secure) to have the
+# cookie attached to fetch()/XHR requests at all.
+CSRF_COOKIE_SAMESITE = env(
+    "DJANGO_CSRF_COOKIE_SAMESITE",
+    default="Lax",
+)
+
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
 X_FRAME_OPTIONS = "DENY"
@@ -327,6 +337,13 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS256",
 }
 
+
+# SECURITY: gates `seed_staging_data`, which deletes/recreates demo
+# accounts. Must stay unset everywhere except the staging environment.
+ALLOW_STAGING_SEED_DATA = env.bool(
+    "ALLOW_STAGING_SEED_DATA",
+    default=False,
+)
 
 FRONTEND_URL = env(
     "FRONTEND_URL",
