@@ -388,3 +388,24 @@ LOGGING = {
         },
     },
 }
+
+
+# Error monitoring. Only active when a DSN is configured (local dev has
+# none, so this is a no-op there). A DSN is an ingestion endpoint, not a
+# secret - Sentry's own docs say it's safe to expose client-side.
+SENTRY_DSN = env("SENTRY_DSN", default="")
+
+if SENTRY_DSN and "pytest" not in sys.modules:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        environment=env("SENTRY_ENVIRONMENT", default="production"),
+        release=env("RENDER_GIT_COMMIT", default="dev")[:7],
+        # Errors only - no performance/profiling traces, we don't need them
+        # and they'd burn through the free plan's event quota fast.
+        traces_sample_rate=0.0,
+        send_default_pii=False,
+    )
