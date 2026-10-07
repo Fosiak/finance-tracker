@@ -1,7 +1,9 @@
 import os
 import time
 
+from django.conf import settings
 from django.db import connection
+from django.http import Http404
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
@@ -41,3 +43,21 @@ class HealthView(APIView):
             },
             headers={"Cache-Control": "no-store"},
         )
+
+
+class SentryTestView(APIView):
+    """Staging-only. Deliberately raises to verify Sentry is wired up.
+
+    Gated behind the same flag as seed_staging_data - never reachable on
+    production, 404s everywhere else.
+    """
+
+    authentication_classes = []
+    permission_classes = [AllowAny]
+    schema = None
+
+    def get(self, request):
+        if not getattr(settings, "ALLOW_STAGING_SEED_DATA", False):
+            raise Http404
+
+        raise RuntimeError("Sentry test error - triggered intentionally")
